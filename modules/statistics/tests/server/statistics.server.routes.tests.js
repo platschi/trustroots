@@ -1,296 +1,194 @@
-'use strict';
+const request = require('supertest');
+const path = require('path');
+const mongoose = require('mongoose');
+const express = require(path.resolve('./config/lib/express'));
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
 
-var should = require('should'),
-    request = require('supertest'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    Offer = mongoose.model('Offer'),
-    express = require(path.resolve('./config/lib/express'));
+require('should');
 
-/**
- * Globals
- */
-var app,
-    agent,
-    credentials,
-    user1,
-    user2,
-    user3,
-    offer;
+const Offer = mongoose.model('Offer');
+
+function assertStats(stats) {
+  stats.total.should.equal(4);
+
+  stats.connections.should.have.lengthOf(6);
+  stats.connections.map(connection => {
+    connection.count.should.equal(2);
+    connection.percentage.should.equal(50);
+  });
+
+  stats.hosting.total.should.equal(2);
+  stats.hosting.percentage.should.equal(50);
+  stats.hosting.maybe.should.equal(1);
+  stats.hosting.maybePercentage.should.equal(50);
+  stats.hosting.yes.should.equal(1);
+  stats.hosting.yesPercentage.should.equal(50);
+
+  stats.newsletter.count.should.equal(2);
+  stats.newsletter.percentage.should.equal(50);
+}
 
 /**
  * Statistics routes tests
  */
-describe('Statistics CRUD tests', function () {
+describe('Statistics CRUD tests', () => {
+  const app = express.init(mongoose.connection);
+  const agent = request.agent(app);
 
-  before(function () {
-    // Get application
-    app = express.init(mongoose.connection);
-    agent = request.agent(app);
-  });
+  describe('Reading statistics', async () => {
+    let users;
 
-  describe('Reading statistics', function () {
+    // Not belonging to any network
+    const _usersPublic1 = utils.generateUsers(2, {
+      public: true,
+    });
 
-    before(function (done) {
-      // Create user credentials
-      credentials = {
-        username: 'loremipsum',
-        password: 'Password123!'
-      };
-
-      // Create a new user NON-public user
-      user1 = new User({
-        firstName: 'Full',
-        lastName: 'Name',
-        displayName: 'Full Name',
-        email: 'test1@test.com',
-        username: credentials.username,
-        password: credentials.password,
-        provider: 'local',
-        newsletter: true,
-        public: false,
-        extSitesCS: 'username1',
-        extSitesBW: 'username1',
-        extSitesWS: '1231231'
-      });
-
-      // Create a new user public user
-      user2 = new User({
-        firstName: 'Full',
-        lastName: 'Name',
-        displayName: 'Full Name',
-        email: 'test2@test.com',
-        username: credentials.username + '2',
-        password: credentials.password,
-        provider: 'local',
-        newsletter: true,
-        public: true,
-        extSitesCS: 'username2',
-        extSitesBW: 'username2',
-        extSitesWS: '12312312'
-      });
-
-      // Create a new user public user without extSites and without newsletter
-      user3 = new User({
-        firstName: 'Full',
-        lastName: 'Name',
-        displayName: 'Full Name',
-        email: 'test3@test.com',
-        username: credentials.username + '3',
-        password: credentials.password,
-        provider: 'local',
-        newsletter: false,
-        public: true,
-        extSitesCS: 'username3',
-        additionalProvidersData: {
-          facebook: {
-            username: 'username3'
-          },
-          twitter: {
-            username: 'username3'
-          },
-          github: {
-            username: 'username3'
-          }
+    // Belonging to networks
+    const _usersPublic2 = utils.generateUsers(2, {
+      public: true,
+      newsletter: true,
+      extSitesCS: 'username',
+      extSitesBW: 'username',
+      extSitesWS: '12312312',
+      additionalProvidersData: {
+        facebook: {
+          username: 'username',
         },
-        extSitesBW: ''
-      });
+        twitter: {
+          username: 'username',
+        },
+        github: {
+          username: 'username',
+        },
+      },
+    });
 
-      offer = {
+    const _usersPrivate = utils.generateUsers(1, {
+      public: false,
+      newsletter: true,
+      extSitesCS: 'nonpublic',
+      extSitesBW: 'nonpublic',
+      extSitesWS: '12312312',
+      additionalProvidersData: {
+        facebook: {
+          username: 'username',
+        },
+        twitter: {
+          username: 'username',
+        },
+        github: {
+          username: 'username',
+        },
+      },
+    });
+
+    const _users = [..._usersPublic1, ..._usersPublic2, ..._usersPrivate];
+
+    // Save database contents just once because we're not modifying anything between tests
+    before(async () => {
+      users = await utils.saveUsers(_users);
+
+      // @TODO: add via test utils
+      const offer = {
         description: '',
-        noOfferDescription: '',
+        location: [52.498981209298776, 13.418329954147339],
+        locationFuzzy: [52.50155039101136, 13.42255019882177],
         maxGuests: 1,
+        noOfferDescription: '',
         type: 'host',
         updated: new Date(),
-        location: [52.498981209298776, 13.418329954147339],
-        locationFuzzy: [52.50155039101136, 13.42255019882177]
       };
 
-      // Save users and offers to the test db
-      user1.save(function (err, user1res) {
-        should.not.exist(err);
-        offer.user = user1res._id;
-        offer.status = 'yes';
-        new Offer(offer).save(function (err) {
-          should.not.exist(err);
-          user2.save(function (err, user2res) {
-            should.not.exist(err);
-            offer.user = user2res._id;
-            offer.status = 'maybe';
-            new Offer(offer).save(function (err) {
-              should.not.exist(err);
-              user3.save(function (err, user3res) {
-                should.not.exist(err);
-                offer.user = user3res._id;
-                offer.status = 'no';
-                new Offer(offer).save(function (err) {
-                  should.not.exist(err);
-                  return done();
-                });
-              });
-            });
-          });
-        });
-      });
+      await new Offer({
+        ...offer,
+        status: 'yes',
+        user: users[0]._id,
+      }).save();
 
+      await new Offer({
+        ...offer,
+        status: 'maybe',
+        user: users[1]._id,
+      }).save();
+
+      await new Offer({
+        ...offer,
+        status: 'no',
+        user: users[2]._id,
+      }).save();
     });
 
-    it('should be able to read statistics when not logged in', function (done) {
+    after(utils.clearDatabase);
 
-      // Read statistics
-      agent.get('/api/statistics')
-        .expect(200)
-        .end(function (statsReadErr, statsReadRes) {
-
-          statsReadRes.body.connected.bewelcome.should.equal(1);
-          statsReadRes.body.connected.couchsurfing.should.equal(2);
-          statsReadRes.body.connected.warmshowers.should.equal(1);
-          statsReadRes.body.connected.facebook.should.equal(1);
-          statsReadRes.body.connected.twitter.should.equal(1);
-          statsReadRes.body.connected.github.should.equal(1);
-
-          statsReadRes.body.hosting.maybe.should.equal(1);
-          statsReadRes.body.hosting.yes.should.equal(1);
-          should.not.exist(statsReadRes.body.hosting.no);
-
-          statsReadRes.body.total.should.equal(2);
-          statsReadRes.body.newsletter.should.equal(1);
-
-          // Call the assertion callback
-          return done(statsReadErr);
-        });
-    });
-
-    it('should be able to read statistics when logged in', function (done) {
-      agent.post('/api/auth/signin')
-        .send(credentials)
-        .expect(200)
-        .end(function (signinErr) {
-          // Handle signin error
-          if (signinErr) return done(signinErr);
-
-          // Read statistics
-          agent.get('/api/statistics')
-            .expect(200)
-            .end(function (statsReadErr, statsReadRes) {
-
-              statsReadRes.body.connected.bewelcome.should.equal(1);
-              statsReadRes.body.connected.couchsurfing.should.equal(2);
-              statsReadRes.body.connected.warmshowers.should.equal(1);
-              statsReadRes.body.connected.facebook.should.equal(1);
-              statsReadRes.body.connected.twitter.should.equal(1);
-              statsReadRes.body.connected.github.should.equal(1);
-
-              statsReadRes.body.hosting.maybe.should.equal(1);
-              statsReadRes.body.hosting.yes.should.equal(1);
-              should.not.exist(statsReadRes.body.hosting.no);
-
-              statsReadRes.body.total.should.equal(2);
-              statsReadRes.body.newsletter.should.equal(1);
-
-              // Call the assertion callback
-              return done(statsReadErr);
-            });
-
-        });
-    });
-
-    after(function (done) {
-      // Clean out
-      User.deleteMany().exec(function () {
-        Offer.deleteMany().exec(done);
-      });
+    it('should be able to read statistics when not logged in', async () => {
+      const { body } = await agent.get('/api/statistics').expect(200);
+      assertStats(body);
     });
   });
 
-  describe('Writing statistics', function () {
+  describe('Writing statistics', () => {
+    after(utils.clearDatabase);
 
-    it('should be able to write to statistics endpoint', function (done) {
-
-      // Write statistics
-      agent.post('/api/statistics')
+    it('should be able to write to statistics endpoint', async () => {
+      const { body, headers } = await agent
+        .post('/api/statistics')
         .send({
           collection: 'mobileAppInit',
           stats: {
             version: '1.0.0',
             deviceYearClass: '2015',
             expoVersion: '21.0.0',
-            os: 'android'
-          }
+            os: 'android',
+          },
         })
-        // .expect(200)
-        .end(function (statsWriteErr, statsWriteRes) {
-          if (statsWriteErr) {
-            return done(statsWriteErr);
-          }
+        .expect(200);
 
-          statsWriteRes.body.message.should.equal('OK');
-          statsWriteRes.headers.should.not.have.property('x-tr-update-needed');
-
-          // Call the assertion callback
-          return done();
-        });
-
+      body.message.should.equal('OK');
+      headers.should.not.have.property('x-tr-update-needed');
     });
 
-    it('should return update header with invalid collection value', function (done) {
-
-      // Write statistics
-      agent.post('/api/statistics')
+    it('should return update header with invalid collection value', async () => {
+      const { body, headers } = await agent
+        .post('/api/statistics')
         .send({
           collection: 'WRONG',
           stats: {
             version: '1.0.0',
             deviceYearClass: '2015',
             expoVersion: '21.0.0',
-            os: 'android'
-          }
+            os: 'android',
+          },
         })
-        .expect(400)
-        .end(function (statsWriteErr, statsWriteRes) {
-          if (statsWriteErr) {
-            return done(statsWriteErr);
-          }
+        .expect(400);
 
-          statsWriteRes.body.message.should.equal('Missing or invalid `collection`.');
-          statsWriteRes.headers.should.have.property('x-tr-update-needed');
-          statsWriteRes.headers['x-tr-update-needed'].should.equal('You should update Trustroots app or otherwise it will not continue functioning.');
-
-          // Call the assertion callback
-          return done();
-        });
-
+      body.message.should.equal('Missing or invalid `collection`.');
+      headers.should.have.property('x-tr-update-needed');
+      headers['x-tr-update-needed'].should.equal(
+        'You should update Trustroots app or otherwise it will not continue functioning.',
+      );
     });
 
-    it('should return update header with old app version', function (done) {
-
-      // Write statistics
-      agent.post('/api/statistics')
+    it('should return update header with old app version', async () => {
+      const { body, headers } = await agent
+        .post('/api/statistics')
         .send({
           collection: 'mobileAppInit',
           stats: {
             version: '0.1.0',
             deviceYearClass: '2015',
             expoVersion: '21.0.0',
-            os: 'android'
-          }
+            os: 'android',
+          },
         })
-        .expect(200)
-        .end(function (statsWriteErr, statsWriteRes) {
-          if (statsWriteErr) {
-            return done(statsWriteErr);
-          }
+        .expect(200);
 
-          statsWriteRes.body.message.should.equal('You should update Trustroots app or otherwise it will not continue functioning.');
-          statsWriteRes.headers.should.have.property('x-tr-update-needed');
-          statsWriteRes.headers['x-tr-update-needed'].should.equal('You should update Trustroots app or otherwise it will not continue functioning.');
-
-          // Call the assertion callback
-          return done();
-        });
-
+      body.message.should.equal(
+        'You should update Trustroots app or otherwise it will not continue functioning.',
+      );
+      headers.should.have.property('x-tr-update-needed');
+      headers['x-tr-update-needed'].should.equal(
+        'You should update Trustroots app or otherwise it will not continue functioning.',
+      );
     });
   });
-
 });

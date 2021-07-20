@@ -1,40 +1,40 @@
-(function () {
-  'use strict';
+// Users service used for communicating with the users REST endpoint
+angular.module('users').factory('Users', UsersFactory);
 
-  // Users service used for communicating with the users REST endpoint
-  angular
-    .module('users')
-    .factory('Users', UsersFactory);
-
-  /* @ngInject */
-  function UsersFactory($resource) {
-    var Users = $resource('/api/users', {}, {
+/* @ngInject */
+function UsersFactory($resource) {
+  const Users = $resource(
+    '/api/users',
+    {},
+    {
       update: {
-        method: 'PUT'
+        method: 'PUT',
       },
       get: {
-        method: 'GET'
+        method: 'GET',
       },
       delete: {
-        method: 'DELETE'
+        method: 'DELETE',
       },
       deleteConfirm: {
         method: 'DELETE',
-        url: '/api/users/remove/:token'
-      }
-    });
+        url: '/api/users/remove/:token',
+      },
+    },
+  );
 
-    angular.extend(Users, {
-      deleteWithToken: function (token) {
-        return this.deleteConfirm({
-          'token': token // api expects token as a parameter (i.e. /:token)
-        }, {
-          'token': token
-        }).$promise;
-      }
-    });
+  angular.extend(Users, {
+    deleteWithToken(token) {
+      return this.deleteConfirm(
+        {
+          token, // api expects token as a parameter (i.e. /:token)
+        },
+        {
+          token,
+        },
+      ).$promise;
+    },
+  });
 
-    return Users;
-  }
-
-}());
+  return Users;
+}

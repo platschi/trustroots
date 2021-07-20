@@ -1,35 +1,23 @@
-(function () {
-  'use strict';
+angular.module('support').config(SupportRoutes);
 
-  angular
-    .module('support')
-    .config(SupportRoutes);
-
-  /* @ngInject */
-  function SupportRoutes($stateProvider) {
-
-    $stateProvider.
-      state('support', {
-        url: '/support?report=',
-        templateUrl: '/modules/support/views/support.client.view.html',
-        requiresAuth: false,
-        controller: 'SupportController',
-        controllerAs: 'support',
-        data: {
-          pageTitle: 'Support'
-        }
-      }).
-      // Deprecated (02-2016):
-      state('contact', {
-        url: '/contact',
-        templateUrl: '/modules/support/views/support.client.view.html',
-        requiresAuth: false,
-        controller: 'SupportController',
-        controllerAs: 'support',
-        data: {
-          pageTitle: 'Contact us'
-        }
-      });
-  }
-
-}());
+/* @ngInject */
+function SupportRoutes($stateProvider) {
+  $stateProvider
+    .state('support', {
+      url: '/support?report=',
+      template: '<support-page user="app.user"></support-page>',
+      requiresAuth: false,
+      data: {
+        pageTitle: 'Support',
+      },
+    })
+    // Deprecated (02-2016):
+    .state('contact', {
+      url: '/contact',
+      template: '<support-page user="app.user"></support-page>',
+      requiresAuth: false,
+      data: {
+        pageTitle: 'Contact us',
+      },
+    });
+}

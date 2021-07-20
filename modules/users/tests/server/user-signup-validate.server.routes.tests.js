@@ -1,22 +1,23 @@
-'use strict';
+const should = require('should');
+const request = require('supertest');
+const path = require('path');
+const mongoose = require('mongoose');
+const express = require(path.resolve('./config/lib/express'));
+const config = require(path.resolve('./config/config'));
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
 
-var should = require('should'),
-    request = require('supertest'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    express = require(path.resolve('./config/lib/express')),
-    config = require(path.resolve('./config/config'));
+const User = mongoose.model('User');
 
 /**
  * Globals
  */
-var app,
-    agent,
-    user;
+let app;
+let agent;
+let user;
 
 function validationFailure(object, error, message, done) {
-  agent.post('/api/auth/signup/validate')
+  agent
+    .post('/api/auth/signup/validate')
     .send(object)
     .expect(200)
     .end(function (validateErr, validateRes) {
@@ -34,7 +35,8 @@ function validationFailure(object, error, message, done) {
 }
 
 function validationSuccess(object, done) {
-  agent.post('/api/auth/signup/validate')
+  agent
+    .post('/api/auth/signup/validate')
     .send(object)
     .expect(200)
     .end(function (validateErr, validateRes) {
@@ -55,7 +57,6 @@ function validationSuccess(object, done) {
  * User routes tests
  */
 describe('User signup validation CRUD tests', function () {
-
   before(function (done) {
     // Get application
     app = express.init(mongoose.connection);
@@ -64,14 +65,15 @@ describe('User signup validation CRUD tests', function () {
     done();
   });
 
-  describe('Username validation', function () {
+  afterEach(utils.clearDatabase);
 
+  describe('Username validation', function () {
     it('should show an error when missing username info', function (done) {
       validationFailure(
         {},
         'username-missing',
         'Please provide required `username` field.',
-        done
+        done,
       );
     });
 
@@ -86,36 +88,41 @@ describe('User signup validation CRUD tests', function () {
         emailToken: 'initial email token',
         username: 'taken_username',
         password: 'TR-I$Aw3$0m4',
-        provider: 'local'
+        provider: 'local',
       });
       user.save(function () {
         validationFailure(
           { username: 'taken_username' },
           'username-not-available',
           'Username is not available.',
-          done
+          done,
         );
       });
     });
 
     it('should show an error when try to validate with not allowed username', function (done) {
       validationFailure(
-        { username: config.illegalStrings[Math.floor(Math.random() * config.illegalStrings.length)] },
+        {
+          username:
+            config.illegalStrings[
+              Math.floor(Math.random() * config.illegalStrings.length)
+            ],
+        },
         'username-not-available-reserved',
         'Username is not available.',
-        done
+        done,
       );
     });
 
     describe('Username is in invalid format', function () {
-      var invalidMessage = 'Username is in invalid format.';
+      const invalidMessage = 'Username is in invalid format.';
 
       it('should show error to validate username beginning with "." (dot)', function (done) {
         validationFailure(
           { username: '.login' },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
 
@@ -124,7 +131,7 @@ describe('User signup validation CRUD tests', function () {
           { username: 'login.' },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
 
@@ -133,7 +140,7 @@ describe('User signup validation CRUD tests', function () {
           { username: 'log..in' },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
 
@@ -142,7 +149,7 @@ describe('User signup validation CRUD tests', function () {
           { username: 'lo' },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
 
@@ -151,7 +158,7 @@ describe('User signup validation CRUD tests', function () {
           { username: '-_-' },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
 
@@ -160,26 +167,15 @@ describe('User signup validation CRUD tests', function () {
           { username: 'l'.repeat(35) },
           'username-invalid',
           invalidMessage,
-          done
+          done,
         );
       });
-
     });
 
     describe('Username is valid', function () {
-
       it('should validate username with dot in the middle', function (done) {
-        validationSuccess(
-          { username: 'log.in' },
-          done
-        );
+        validationSuccess({ username: 'log.in' }, done);
       });
-
     });
-
-  });
-
-  afterEach(function (done) {
-    User.deleteMany().exec(done);
   });
 });

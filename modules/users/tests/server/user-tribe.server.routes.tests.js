@@ -1,27 +1,26 @@
-'use strict';
+const should = require('should');
+const request = require('supertest');
+const path = require('path');
+const mongoose = require('mongoose');
+const express = require(path.resolve('./config/lib/express'));
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
 
-var should = require('should'),
-    request = require('supertest'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    Tribe = mongoose.model('Tribe'),
-    express = require(path.resolve('./config/lib/express'));
+const User = mongoose.model('User');
+const Tribe = mongoose.model('Tribe');
 
 /**
  * Globals
  */
-var app,
-    agent,
-    credentials,
-    user,
-    _user;
+let app;
+let agent;
+let credentials;
+let user;
+let _user;
 
 /**
  * User routes tests
  */
 describe('User tribe memberships CRUD tests', function () {
-
   before(function (done) {
     // Get application
     app = express.init(mongoose.connection);
@@ -34,7 +33,7 @@ describe('User tribe memberships CRUD tests', function () {
     // Create user credentials
     credentials = {
       username: 'TR_username',
-      password: 'TR-I$Aw3$0m4'
+      password: 'TR-I$Aw3$0m4',
     };
 
     // Create a new user
@@ -47,7 +46,7 @@ describe('User tribe memberships CRUD tests', function () {
       emailToken: 'initial email token',
       username: credentials.username.toLowerCase(),
       password: credentials.password,
-      provider: 'local'
+      provider: 'local',
     };
 
     user = new User(_user);
@@ -56,8 +55,11 @@ describe('User tribe memberships CRUD tests', function () {
     user.save(done);
   });
 
+  afterEach(utils.clearDatabase);
+
   it('should be able to join a tribe', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -67,19 +69,19 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Create test tribe
-        var tribe = new Tribe({
-          label: 'Awesome Tribe'
+        const tribe = new Tribe({
+          label: 'Awesome Tribe',
         });
 
         // Add tribe to test DB
         tribe.save(function (err, tribe) {
           should.not.exist(err);
 
-          agent.post('/api/users/memberships/' + tribe._id)
+          agent
+            .post('/api/users/memberships/' + tribe._id)
             .send()
             .expect(200)
             .end(function (userTribeErr, userTribeRes) {
-
               // Handle joining tag error
               if (userTribeErr) {
                 return done(userTribeErr);
@@ -96,9 +98,15 @@ describe('User tribe memberships CRUD tests', function () {
               should.exist(userTribeRes.body.tribe.color);
 
               // It should return updated user
-              userTribeRes.body.user.username.should.be.equal(credentials.username.toLowerCase());
-              userTribeRes.body.user.memberIds[0].should.be.equal(tribe._id.toString());
-              userTribeRes.body.user.member[0].tribe.should.be.equal(tribe._id.toString());
+              userTribeRes.body.user.username.should.be.equal(
+                credentials.username.toLowerCase(),
+              );
+              userTribeRes.body.user.memberIds[0].should.be.equal(
+                tribe._id.toString(),
+              );
+              userTribeRes.body.user.member[0].tribe.should.be.equal(
+                tribe._id.toString(),
+              );
               should.exist(userTribeRes.body.user.member[0].since);
 
               return done();
@@ -108,7 +116,8 @@ describe('User tribe memberships CRUD tests', function () {
   });
 
   it('should be able to leave tribes', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -118,8 +127,8 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Create test tribe
-        var tribe = new Tribe({
-          label: 'Hitchhikers'
+        const tribe = new Tribe({
+          label: 'Hitchhikers',
         });
 
         // Add tribe to test DB
@@ -127,11 +136,11 @@ describe('User tribe memberships CRUD tests', function () {
           should.not.exist(err);
 
           // Join tribe
-          agent.post('/api/users/memberships/' + tribe._id)
+          agent
+            .post('/api/users/memberships/' + tribe._id)
             .send()
             .expect(200)
             .end(function (userTribeJoinErr, userTribeJoinRes) {
-
               // Handle joining tag error
               if (userTribeJoinErr) {
                 return done(userTribeJoinErr);
@@ -145,11 +154,11 @@ describe('User tribe memberships CRUD tests', function () {
               userTribeJoinRes.body.user.member.length.should.be.equal(1);
 
               // Leave tribe
-              agent.delete('/api/users/memberships/' + tribe._id)
+              agent
+                .delete('/api/users/memberships/' + tribe._id)
                 .send()
                 .expect(200)
                 .end(function (userTagLeaveErr, userTagLeaveRes) {
-
                   // Handle leaving tag error
                   if (userTagLeaveErr) {
                     return done(userTagLeaveErr);
@@ -164,14 +173,14 @@ describe('User tribe memberships CRUD tests', function () {
 
                   return done();
                 });
-
             });
         });
       });
   });
 
   it('should be able to show error if trying to join same tribe twice', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -181,8 +190,8 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Create test tribe
-        var tribe = new Tribe({
-          label: 'Russian literature students'
+        const tribe = new Tribe({
+          label: 'Russian literature students',
         });
 
         // Add tribe to test DB
@@ -190,11 +199,11 @@ describe('User tribe memberships CRUD tests', function () {
           should.not.exist(err);
 
           // Join tribe
-          agent.post('/api/users/memberships/' + tribe._id)
+          agent
+            .post('/api/users/memberships/' + tribe._id)
             .send()
             .expect(200)
             .end(function (userTribeJoinErr, userTribeJoinRes) {
-
               // Handle joining tag error
               if (userTribeJoinErr) {
                 return done(userTribeJoinErr);
@@ -208,28 +217,30 @@ describe('User tribe memberships CRUD tests', function () {
               userTribeJoinRes.body.user.member.length.should.be.equal(1);
 
               // Join tribe again
-              agent.post('/api/users/memberships/' + tribe._id)
+              agent
+                .post('/api/users/memberships/' + tribe._id)
                 .send()
                 .expect(409)
                 .end(function (userTagJoin2Err, userTagJoin2Res) {
-
                   // Handle leaving tag error
                   if (userTagJoin2Err) {
                     return done(userTagJoin2Err);
                   }
 
-                  userTagJoin2Res.body.message.should.be.equal('You are already a member of this tribe.');
+                  userTagJoin2Res.body.message.should.be.equal(
+                    'You are already a member of this tribe.',
+                  );
 
                   return done();
                 });
-
             });
         });
       });
   });
 
   it('should be able to show error if trying to leave tribe user is not member', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -239,8 +250,8 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Create test tribe
-        var tribe = new Tribe({
-          label: 'Japanese linguistics'
+        const tribe = new Tribe({
+          label: 'Japanese linguistics',
         });
 
         // Add tribe to test DB
@@ -248,17 +259,19 @@ describe('User tribe memberships CRUD tests', function () {
           should.not.exist(err);
 
           // Leave tribe
-          agent.delete('/api/users/memberships/' + tribe._id)
+          agent
+            .delete('/api/users/memberships/' + tribe._id)
             .send()
             .expect(409)
             .end(function (userTribeJoinErr, userTribeJoinRes) {
-
               // Handle joining tag error
               if (userTribeJoinErr) {
                 return done(userTribeJoinErr);
               }
 
-              userTribeJoinRes.body.message.should.be.equal('You are not a member of this tribe.');
+              userTribeJoinRes.body.message.should.be.equal(
+                'You are not a member of this tribe.',
+              );
 
               return done();
             });
@@ -267,7 +280,8 @@ describe('User tribe memberships CRUD tests', function () {
   });
 
   it('should be able to show error if trying to join non-existing tribe', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -277,11 +291,11 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Join tribe
-        agent.post('/api/users/memberships/572a3d36f905fe5c53bf1d1f')
+        agent
+          .post('/api/users/memberships/572a3d36f905fe5c53bf1d1f')
           .send()
           .expect(400)
           .end(function (userTribeJoinErr, userTribeJoinRes) {
-
             // Handle joining tag error
             if (userTribeJoinErr) {
               return done(userTribeJoinErr);
@@ -295,7 +309,8 @@ describe('User tribe memberships CRUD tests', function () {
   });
 
   it('should be able to show error if trying to join tribe with non standard ID', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -305,26 +320,22 @@ describe('User tribe memberships CRUD tests', function () {
         }
 
         // Join tribe
-        agent.post('/api/users/memberships/123456')
+        agent
+          .post('/api/users/memberships/123456')
           .send()
           .expect(400)
           .end(function (userTribeJoinErr, userTribeJoinRes) {
-
             // Handle joining tag error
             if (userTribeJoinErr) {
               return done(userTribeJoinErr);
             }
 
-            userTribeJoinRes.body.message.should.be.equal('Cannot interpret id.');
+            userTribeJoinRes.body.message.should.be.equal(
+              'Cannot interpret id.',
+            );
 
             return done();
           });
       });
-  });
-
-  afterEach(function (done) {
-    User.deleteMany().exec(function () {
-      Tribe.deleteMany().exec(done);
-    });
   });
 });

@@ -1,17 +1,16 @@
-'use strict';
-
-var _ = require('lodash'),
-    path = require('path'),
-    agenda = require(path.resolve('./config/lib/agenda')),
-    config = require(path.resolve('./config/config')),
-    url = (config.https ? 'https' : 'http') + '://' + config.domain,
-    analyticsHandler = require(path.resolve('./modules/core/server/controllers/analytics.server.controller'));
+const _ = require('lodash');
+const path = require('path');
+const agenda = require(path.resolve('./config/lib/agenda'));
+const config = require(path.resolve('./config/config'));
+const url = (config.https ? 'https' : 'http') + '://' + config.domain;
+const analyticsHandler = require(path.resolve(
+  './modules/core/server/controllers/analytics.server.controller',
+));
 
 exports.notifyPushDeviceAdded = function (user, platform, callback) {
-
   if (_.get(user, 'pushRegistration', []).length === 0) return callback();
 
-  var editAccountUrl = url + '/profile/edit/account';
+  const editAccountUrl = url + '/profile/edit/account';
 
   function platformVerbal(platform) {
     switch (platform) {
@@ -28,34 +27,36 @@ exports.notifyPushDeviceAdded = function (user, platform, callback) {
     }
   }
 
-  var notification = {
+  const notification = {
     title: 'Trustroots',
-    body: 'You just enabled Trustroots ' + platformVerbal(platform) + ' notifications. Yay!',
+    body:
+      'You just enabled Trustroots ' +
+      platformVerbal(platform) +
+      ' notifications. Yay!',
     click_action: analyticsHandler.appendUTMParams(editAccountUrl, {
       source: 'push-notification',
       medium: 'fcm',
       campaign: 'device-added',
-      content: 'reply-to'
-    })
+      content: 'reply-to',
+    }),
   };
 
   exports.sendUserNotification(user, notification, callback);
 };
 
 exports.notifyMessagesUnread = function (userFrom, userTo, data, callback) {
-
   // User does not have push registrations
   if (_.get(userTo, 'pushRegistration', []).length === 0) {
     return callback();
   }
 
-  var messageCount = _.get(data, 'messages', []).length;
+  const messageCount = _.get(data, 'messages', []).length;
 
   // Is the notification the first one?
   // If not, we send a different message.
-  var isFirst = !(data.notificationCount > 0);
+  const isFirst = !(data.notificationCount > 0);
 
-  var body;
+  let body;
 
   if (isFirst) {
     // First notification
@@ -69,59 +70,77 @@ exports.notifyMessagesUnread = function (userFrom, userTo, data, callback) {
     body = userFrom.displayName + ' is still waiting for a reply';
   }
 
-  var messagesUrl = url + '/messages';
+  const messagesUrl = url + '/messages';
 
-  var notification = {
+  const notification = {
     title: 'Trustroots',
-    body: body,
+    body,
     click_action: analyticsHandler.appendUTMParams(messagesUrl, {
       source: 'push-notification',
       medium: 'fcm',
       campaign: 'messages-unread',
-      content: 'reply-to'
-    })
+      content: 'reply-to',
+    }),
   };
 
   exports.sendUserNotification(userTo, notification, callback);
 };
 
 /**
- * Send a push notification about a new reference, to the receiver of the reference
- * @param {User} userFrom - user who gave the reference
- * @param {User} userTo - user who received the reference
+ * Send a push notification about a new experience, to the receiver of the experience
+ * @param {User} userFrom - user who gave the experience
+ * @param {User} userTo - user who received the experience
  * @param {Object} data - notification config
- * @param {boolean} data.isFirst - is it the first reference between users?
  */
-exports.notifyNewReference = function (userFrom, userTo, data, callback) {
-  var giveReferenceUrl = url + '/profile/' + userFrom.username + '/references/new';
-  var readReferencesUrl = url + '/profile/' + userTo.username + '/references';
+exports.notifyNewExperienceFirst = function (userFrom, userTo, callback) {
+  const giveExperienceUrl = `${url}/profile/${userFrom.username}/experiences/new`;
 
-  // When the reference is first, reply reference can be given.
-  // Otherwise both references are public now and can be seen.
-  var actionText = (data.isFirst) ? 'Give a reference back.' : 'You can see it.';
-  var actionUrl = (data.isFirst) ? giveReferenceUrl : readReferencesUrl;
-
-  var notification = {
+  const notification = {
     title: 'Trustroots',
-    body: userFrom.username + ' gave you a new reference. ' + actionText,
-    click_action: analyticsHandler.appendUTMParams(actionUrl, {
+    body: `${userFrom.displayName} shared their experience with you. Share your experience, too.`,
+    click_action: analyticsHandler.appendUTMParams(giveExperienceUrl, {
       source: 'push-notification',
       medium: 'fcm',
-      campaign: 'new-reference',
-      content: 'reply-to' // @TODO what are the correct parameters here? What do they mean?
-    })
+      campaign: 'new-experience',
+      content: 'respond',
+    }),
+  };
+  exports.sendUserNotification(userTo, notification, callback);
+};
+
+/**
+ * Send a push notification about a new experience, to the receiver of the experience
+ * @param {User} userFrom - user who gave the experience
+ * @param {User} userTo - user who received the experience
+ * @param {string} experienceId - ID of the experience
+ */
+exports.notifyNewExperienceSecond = function (
+  userFrom,
+  userTo,
+  experienceId,
+  callback,
+) {
+  const readExperiencesUrl = `${url}/profile/${userTo.username}/experiences#${experienceId}`;
+
+  const notification = {
+    title: 'Trustroots',
+    body: `${userFrom.displayName} shared their experience with you. Both experiences are now published.`,
+    click_action: analyticsHandler.appendUTMParams(readExperiencesUrl, {
+      source: 'push-notification',
+      medium: 'fcm',
+      campaign: 'new-experience',
+      content: 'read',
+    }),
   };
   exports.sendUserNotification(userTo, notification, callback);
 };
 
 exports.sendUserNotification = function (user, notification, callback) {
-
-  var data = {
+  const data = {
     userId: user._id,
     pushServices: user.pushRegistration,
-    notification: notification
+    notification,
   };
 
   agenda.now('send push message', data, callback);
-
 };

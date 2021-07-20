@@ -6,13 +6,13 @@ If you want get familiar with React, start with the [official site](reactjs.org)
 
 We want to have separate codebases for server and client. The client will be written in React.
 
-We'll replace the current AngularJS components one by one. Eventually, we'll drop the AngularJS and create a React project. 
+We'll replace the current AngularJS components one by one. Eventually, we'll drop the AngularJS and create a React project.
 
 ### Rationale
 
 - React is more attractive to developers.
 - AngularJS is being replaced by newer frameworks.
-- [MEAN is not maintained](https://github.com/Trustroots/trustroots/issues/638). 
+- [MEAN is not maintained](https://github.com/Trustroots/trustroots/issues/638).
 - React is simple and minimalistic; we won't risk getting stuck with a framework like AngularJS again.
 - React is not exotic. There is plenty of tooling and documentation available. Lots of folks are already familiar with React.
 - It has the potential to help with [React Native](https://github.com/Trustroots/trustroots-expo-mobile/) implementation of Trustroots. Not necessarily by re-using components but by allowing us to [_"learn once, write everywhere"_](https://www.youtube.com/watch?v=LIeqUPvh8qY).
@@ -62,6 +62,7 @@ In AngularJS view it will look like this:
 ```html
 <profile-view-basics profile="profileCtrl.profile"></profile-view-basics>
 ```
+
 where `profile-view-basics` is a React component imported into AngularJS. We assume that `profileCtrl` is a variable available in the AngularJS view. (Look for `profile-view-basics` in an [example](https://github.com/Trustroots/trustroots/blob/master/modules/users/client/views/profile/profile-view-basics.client.view.html).)
 
 In React, we use the `profile` in `props`:
@@ -94,15 +95,26 @@ export default class ProfileViewBasics {
 }
 ```
 
-## Internacionalization
+## Internationalization (i18n)
 
 Read [a manual](i18n.md).
 
 ## Testing
 
-Testing is done with `Jasmine` and [`Enzyme`](https://github.com/airbnb/enzyme).
+Testing is done with [`jest`](https://jestjs.io/en/) and [`React Testing Library`](https://testing-library.com/docs/react-testing-library/intro).
 
-TODO add an example when references are in master.
+React tests are ones that match the path `modules/*/tests/client/components/*.test.js`.
+
+e.g. [modules/core/tests/client/components/LanguageSwitch.test.js](../modules/core/tests/client/components/LanguageSwitch.test.js)
+
+We loosely follow the philosophy from Kent C. Dodds, summed up as:
+
+> testing using user facing features instead of implementation details
+
+See these two articles by him for more explanation:
+
+- [Write tests. Not too many. Mostly integration.](https://kentcdodds.com/blog/write-tests)
+- [Why I Never Use Shallow Rendering](https://kentcdodds.com/blog/why-i-never-use-shallow-rendering)
 
 ## Time scale
 

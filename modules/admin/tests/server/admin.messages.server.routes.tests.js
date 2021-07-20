@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Message = mongoose.model('Message');
 const User = mongoose.model('User');
 const express = require(path.resolve('./config/lib/express'));
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
 require('should');
 
 /**
@@ -19,12 +20,8 @@ let userRegular2;
 let userRegular1Id;
 let userRegular2Id;
 
-/**
- * Offer routes tests
- */
 describe('Admin Message CRUD tests', () => {
-
-  before((done) => {
+  before(done => {
     // Get application
     app = express.init(mongoose.connection);
     agent = request.agent(app);
@@ -37,13 +34,13 @@ describe('Admin Message CRUD tests', () => {
       // Create admin credentials
       credentialsAdmin = {
         username: 'user-admin',
-        password: 'Password123!'
+        password: 'Password123!',
       };
 
       // Create regular user credentials
       credentialsRegular = {
         username: 'user-regular1',
-        password: 'Password123!'
+        password: 'Password123!',
       };
 
       // Create a new admin user
@@ -56,7 +53,7 @@ describe('Admin Message CRUD tests', () => {
         provider: 'local',
         public: true,
         roles: ['user', 'admin'],
-        ...credentialsAdmin
+        ...credentialsAdmin,
       });
 
       await userAdmin.save();
@@ -71,7 +68,7 @@ describe('Admin Message CRUD tests', () => {
         provider: 'local',
         public: true,
         roles: ['user'],
-        ...credentialsRegular
+        ...credentialsRegular,
       });
 
       // Create a new regular user
@@ -85,7 +82,7 @@ describe('Admin Message CRUD tests', () => {
         public: true,
         roles: ['user'],
         username: 'user-regular2',
-        password: 'Password123!'
+        password: 'Password123!',
       });
 
       const { _id: _userRegular1Id } = await userRegular1.save();
@@ -97,14 +94,14 @@ describe('Admin Message CRUD tests', () => {
         content: 'test',
         notificationCount: 0,
         userFrom: userRegular1Id,
-        userTo: userRegular2Id
+        userTo: userRegular2Id,
       });
 
       const message2 = new Message({
         content: 'test',
         notificationCount: 0,
         userFrom: userRegular2Id,
-        userTo: userRegular1Id
+        userTo: userRegular1Id,
       });
 
       await message1.save();
@@ -115,10 +112,13 @@ describe('Admin Message CRUD tests', () => {
     }
   });
 
+  afterEach(utils.clearDatabase);
+
   describe('Read messages between two users', () => {
-    it('non-authenticated users should not be allowed to read messages', (done) => {
-      agent.post('/api/admin/messages')
-        .send({ 'user1': userRegular1Id, 'user2': userRegular2Id })
+    it('non-authenticated users should not be allowed to read messages', done => {
+      agent
+        .post('/api/admin/messages')
+        .send({ user1: userRegular1Id, user2: userRegular2Id })
         .expect(403)
         .end((err, res) => {
           res.body.message.should.equal('Forbidden.');
@@ -126,17 +126,19 @@ describe('Admin Message CRUD tests', () => {
         });
     });
 
-    it('non-admin users should not be allowed to read messages', (done) => {
-      agent.post('/api/auth/signin')
+    it('non-admin users should not be allowed to read messages', done => {
+      agent
+        .post('/api/auth/signin')
         .send(credentialsRegular)
         .expect(200)
-        .end((signinErr) => {
+        .end(signinErr => {
           if (signinErr) {
             return done(signinErr);
           }
 
-          agent.post('/api/admin/messages')
-            .send({ 'user1': userRegular1Id, 'user2': userRegular2Id })
+          agent
+            .post('/api/admin/messages')
+            .send({ user1: userRegular1Id, user2: userRegular2Id })
             .expect(403)
             .end((err, res) => {
               res.body.message.should.equal('Forbidden.');
@@ -145,17 +147,19 @@ describe('Admin Message CRUD tests', () => {
         });
     });
 
-    it('admin users should be allowed to read messages', (done) => {
-      agent.post('/api/auth/signin')
+    it('admin users should be allowed to read messages', done => {
+      agent
+        .post('/api/auth/signin')
         .send(credentialsAdmin)
         .expect(200)
-        .end((signinErr) => {
+        .end(signinErr => {
           if (signinErr) {
             return done(signinErr);
           }
 
-          agent.post('/api/admin/messages')
-            .send({ 'user1': userRegular1Id, 'user2': userRegular2Id })
+          agent
+            .post('/api/admin/messages')
+            .send({ user1: userRegular1Id, user2: userRegular2Id })
             .expect(200)
             .end((err, res) => {
               res.body.length.should.equal(2);
@@ -164,13 +168,6 @@ describe('Admin Message CRUD tests', () => {
               return done(err);
             });
         });
-    });
-
-  });
-
-  afterEach((done) => {
-    User.deleteMany().exec(() => {
-      Message.deleteMany().exec(done);
     });
   });
 });

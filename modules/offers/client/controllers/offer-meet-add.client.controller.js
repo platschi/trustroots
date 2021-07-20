@@ -1,64 +1,68 @@
-(function () {
-  'use strict';
+angular
+  .module('offers')
+  .controller('OfferMeetAddController', OfferMeetAddController);
 
-  angular
-    .module('offers')
-    .controller('OfferMeetAddController', OfferMeetAddController);
+/* @ngInject */
+function OfferMeetAddController(
+  $state,
+  $analytics,
+  leafletData,
+  OffersService,
+  messageCenterService,
+  defaultLocation,
+) {
+  // ViewModel
+  const vm = this;
 
-  /* @ngInject */
-  function OfferMeetAddController($state, $analytics, leafletData, OffersService, messageCenterService, defaultLocation) {
+  // Expoxed to the view
+  vm.leafletData = leafletData;
+  vm.offer = {};
+  vm.editOffer = editOffer;
+  vm.mapCenter = defaultLocation;
+  vm.isCalendarVisible = false;
+  vm.isLoading = false;
+  vm.newOffer = false;
+  vm.minDescription = 5;
 
-    // ViewModel
-    var vm = this;
+  activate();
 
-    // Expoxed to the view
-    vm.leafletData = leafletData;
-    vm.offer = {};
-    vm.editOffer = editOffer;
-    vm.mapCenter = defaultLocation;
-    vm.isCalendarVisible = false;
-    vm.isLoading = false;
-    vm.newOffer = false;
-    vm.minDescription = 5;
+  /**
+   * Initialize controller
+   */
+  function activate() {
+    vm.newOffer = true;
+  }
 
-    activate();
+  /**
+   * Add offer
+   */
+  function editOffer() {
+    vm.isLoading = true;
 
-    /**
-     * Initialize controller
-     */
-    function activate() {
-      vm.newOffer = true;
-    }
+    const newOffer = new OffersService({
+      type: 'meet',
+      description: vm.offer.description,
+      location: [parseFloat(vm.mapCenter.lat), parseFloat(vm.mapCenter.lng)],
+      validUntil: vm.offer.validUntil,
+    });
 
-    /**
-     * Add offer
-     */
-    function editOffer() {
-      vm.isLoading = true;
-
-      var newOffer = new OffersService({
-        type: 'meet',
-        description: vm.offer.description,
-        location: [parseFloat(vm.mapCenter.lat), parseFloat(vm.mapCenter.lng)],
-        validUntil: vm.offer.validUntil
-      });
-
-      newOffer.$save(function () {
+    newOffer.$save(
+      function () {
         // Done!
         vm.isLoading = false;
         $analytics.eventTrack('offer-modified', {
           category: 'offer.meet.add',
-          label: 'Added meet offer'
+          label: 'Added meet offer',
         });
         $state.go('offer.meet.list');
-      }, function (err) {
+      },
+      function (err) {
         vm.isLoading = false;
-        var errorMessage = (err.data.message) ? err.data.message : 'Error occured. Please try again.';
+        const errorMessage = err.data.message
+          ? err.data.message
+          : 'Error occured. Please try again.';
         messageCenterService.add('danger', errorMessage);
-      });
-
-    }
-
+      },
+    );
   }
-
-}());
+}

@@ -1,54 +1,58 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
-var path = require('path'),
-    testutils = require(path.resolve('./testutils/server.testutil')),
-    config = require(path.resolve('./config/config')),
-    moment = require('moment'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User');
+const path = require('path');
+const testutils = require(path.resolve('./testutils/server/server.testutil'));
+const config = require(path.resolve('./config/config'));
+const moment = require('moment');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
 
 /**
  * Globals
  */
-var unConfirmedUser,
-    _unConfirmedUser,
-    confirmedUser,
-    _confirmedUser,
-    userWelcomeSequenceFirstJobHandler,
-    userWelcomeSequenceSecondJobHandler,
-    userWelcomeSequenceThirdJobHandler,
-    timeLimit,
-    timeFuture,
-    timePast;
+let unConfirmedUser;
+let _unConfirmedUser;
+let confirmedUser;
+let _confirmedUser;
+let userWelcomeSequenceFirstJobHandler;
+let userWelcomeSequenceSecondJobHandler;
+let userWelcomeSequenceThirdJobHandler;
+let timeLimit;
+let timeFuture;
+let timePast;
 
 describe('Job: welcome sequence, third email', function () {
-
-  var jobs = testutils.catchJobs();
+  const jobs = testutils.catchJobs();
 
   before(function () {
-    userWelcomeSequenceFirstJobHandler = require(path.resolve('./modules/users/server/jobs/user-welcome-sequence-first.server.job'));
-    userWelcomeSequenceSecondJobHandler = require(path.resolve('./modules/users/server/jobs/user-welcome-sequence-second.server.job'));
-    userWelcomeSequenceThirdJobHandler = require(path.resolve('./modules/users/server/jobs/user-welcome-sequence-third.server.job'));
+    userWelcomeSequenceFirstJobHandler = require(path.resolve(
+      './modules/users/server/jobs/user-welcome-sequence-first.server.job',
+    ));
+    userWelcomeSequenceSecondJobHandler = require(path.resolve(
+      './modules/users/server/jobs/user-welcome-sequence-second.server.job',
+    ));
+    userWelcomeSequenceThirdJobHandler = require(path.resolve(
+      './modules/users/server/jobs/user-welcome-sequence-third.server.job',
+    ));
   });
 
   // Create time points to test that welcome sequence is sent in correct time
   beforeEach(function (done) {
     // Take limit from config and set timer to past
-    timeLimit = moment().subtract(moment.duration(config.limits.welcomeSequence.third));
+    timeLimit = moment().subtract(
+      moment.duration(config.limits.welcomeSequence.third),
+    );
 
     // Move timer 15 minutes to past and future for testing
-    timePast = moment(timeLimit).subtract(moment.duration({ 'minutes': 1 }));
-    timeFuture = moment(timeLimit).add(moment.duration({ 'minutes': 15 }));
+    timePast = moment(timeLimit).subtract(moment.duration({ minutes: 1 }));
+    timeFuture = moment(timeLimit).add(moment.duration({ minutes: 15 }));
 
     done();
   });
 
   // Create an unconfirmed user
   beforeEach(function (done) {
-
     // Create a new user
     _unConfirmedUser = {
       public: false,
@@ -62,7 +66,7 @@ describe('Job: welcome sequence, third email', function () {
       password: 'M3@n.jsI$Aw3$0m3',
       provider: 'local',
       welcomeSequenceStep: 0,
-      created: moment().subtract(moment.duration({ 'minutes': 3 }))
+      created: moment().subtract(moment.duration({ minutes: 3 })),
     };
 
     unConfirmedUser = new User(_unConfirmedUser);
@@ -73,7 +77,6 @@ describe('Job: welcome sequence, third email', function () {
 
   // Create a confirmed user
   beforeEach(function (done) {
-
     _confirmedUser = {
       public: true,
       firstName: 'Full',
@@ -85,7 +88,7 @@ describe('Job: welcome sequence, third email', function () {
       provider: 'local',
       welcomeSequenceStep: 2,
       welcomeSequenceSent: timePast,
-      created: timePast
+      created: timePast,
     };
 
     confirmedUser = new User(_confirmedUser);
@@ -100,13 +103,15 @@ describe('Job: welcome sequence, third email', function () {
       // Confirmed user received welcome email, unconfirmed didn't
       jobs.length.should.equal(1);
       jobs[0].type.should.equal('send email');
-      jobs[0].data.subject.should.equal('How is it going, ' + _confirmedUser.firstName + '?');
+      jobs[0].data.from.name.should.be.equalOneOf(config.supportVolunteerNames);
+      jobs[0].data.subject.should.equal(
+        'How is it going, ' + _confirmedUser.firstName + '?',
+      );
       // Check that the email contains a link to profile
       jobs[0].data.html.should.match(/href="http.+\/profile\/user_confirmed/);
       done();
     });
   });
-
 
   it('Do not send first and second welcome sequence email when everyone is on step 3', function (done) {
     // Run first welcome sequence email job
@@ -135,7 +140,6 @@ describe('Job: welcome sequence, third email', function () {
         jobs.length.should.equal(0);
         done();
       });
-
     });
   });
 
@@ -149,7 +153,6 @@ describe('Job: welcome sequence, third email', function () {
         jobs.length.should.equal(0);
         done();
       });
-
     });
   });
 

@@ -1,21 +1,30 @@
+@import '~bootstrap/less/mixins/tab-focus';
+@import '~bootstrap/less/mixins/vendor-prefixes';
+@import '~bootstrap/less/mixins/forms';
+@import '~bootstrap/less/mixins/grid';
+@import '~bootstrap/less/forms';
+
+@import '~less/global-variables';
+@import '~less/layout/typography';
+
 /**
  * Forms
  */
 textarea,
-input[type="text"],
-input[type="password"],
-input[type="datetime"],
-input[type="datetime-local"],
-input[type="date"],
-input[type="month"],
-input[type="time"],
-input[type="week"],
-input[type="number"],
-input[type="email"],
-input[type="url"],
-input[type="search"],
-input[type="tel"],
-input[type="color"] {
+input[type='text'],
+input[type='password'],
+input[type='datetime'],
+input[type='datetime-local'],
+input[type='date'],
+input[type='month'],
+input[type='time'],
+input[type='week'],
+input[type='number'],
+input[type='email'],
+input[type='url'],
+input[type='search'],
+input[type='tel'],
+input[type='color'] {
   // Focus state
   &:focus {
     border-color: lighten(@brand-primary, 50%);
@@ -33,7 +42,7 @@ input[type="color"] {
 }
 
 // We have "reveal password" button via Angular directive already
-input[type="password"]::-ms-reveal {
+input[type='password']::-ms-reveal {
   display: none;
 }
 
@@ -89,7 +98,9 @@ label + .checkbox {
   border-color: transparent;
   background: transparent;
   color: @text-color;
-  &, &:focus, &:active {
+  &,
+  &:focus,
+  &:active {
     box-shadow: none;
     outline: none;
   }
@@ -103,7 +114,8 @@ label + .checkbox {
     margin: 0 auto;
   }
   .btn {
-    &, &:focus {
+    &,
+    &:focus {
       outline: none;
     }
   }
@@ -111,7 +123,8 @@ label + .checkbox {
     margin: 0 1px;
     font-size: 28px;
     line-height: 28px;
-    &, &:hover {
+    &,
+    &:hover {
       -moz-appearance: textfield;
       -webkit-appearance: textfield;
     }

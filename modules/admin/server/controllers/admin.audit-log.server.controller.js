@@ -2,7 +2,9 @@
  * Module dependencies.
  */
 const path = require('path');
-const errorService = require(path.resolve('./modules/core/server/services/error.server.service'));
+const errorService = require(path.resolve(
+  './modules/core/server/services/error.server.service',
+));
 const log = require(path.resolve('./config/lib/logger'));
 const mongoose = require('mongoose');
 
@@ -23,13 +25,15 @@ exports.record = (req, res, next) => {
     params: req.params,
     query: req.query,
     route: req.route.path,
-    user: req.user._id
+    user: req.user._id,
   });
 
   // Save support request to db
-  auditLogItem.save((error) => {
+  auditLogItem.save(error => {
     if (error) {
-      log('error', 'Failed storing audit log item to the DB. #fi2fb2', { error });
+      log('error', 'Failed storing audit log item to the DB. #fi2fb2', {
+        error,
+      });
     }
     next();
   });
@@ -39,19 +43,18 @@ exports.record = (req, res, next) => {
  * This middleware stores queries to audit log
  */
 exports.list = (req, res) => {
-  AuditLog
-    .find()
+  AuditLog.find()
     .sort('-date')
     .limit(100)
     .populate({
       path: 'user',
       select: 'username',
-      model: 'User'
+      model: 'User',
     })
     .exec((err, items) => {
       if (err) {
         return res.status(400).send({
-          message: errorService.getErrorMessage(err)
+          message: errorService.getErrorMessage(err),
         });
       }
       res.send(items || []);

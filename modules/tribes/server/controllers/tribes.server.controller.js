@@ -1,13 +1,13 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
-var path = require('path'),
-    errorService = require(path.resolve('./modules/core/server/services/error.server.service')),
-    paginate = require('express-paginate'),
-    mongoose = require('mongoose'),
-    Tribe = mongoose.model('Tribe');
+const path = require('path');
+const errorService = require(path.resolve(
+  './modules/core/server/services/error.server.service',
+));
+const paginate = require('express-paginate');
+const mongoose = require('mongoose');
+const Tribe = mongoose.model('Tribe');
 
 // Publicly exposed fields from tribes
 exports.tribeFields = [
@@ -16,20 +16,26 @@ exports.tribeFields = [
   'label',
   'count',
   'color',
-  'image_UUID',
+  'image',
   'attribution',
   'attribution_url',
   'description',
-  'created'
+  'created',
 ].join(' ');
 
 /**
  * Constructs link headers for pagination
  */
-var setLinkHeader = function (req, res, pageCount) {
+const setLinkHeader = function (req, res, pageCount) {
   if (paginate.hasNextPages(req)(pageCount)) {
-    var nextPage = { page: req.query.page + 1 };
-    var linkHead = '<' + req.protocol + ':' + res.locals.url.slice(0, -1) + res.locals.paginate.href(nextPage) + '>; rel="next"';
+    const nextPage = { page: req.query.page + 1 };
+    const linkHead =
+      '<' +
+      req.protocol +
+      ':' +
+      res.locals.url.slice(0, -1) +
+      res.locals.paginate.href(nextPage) +
+      '>; rel="next"';
     res.set('Link', linkHead);
   }
 };
@@ -38,23 +44,22 @@ var setLinkHeader = function (req, res, pageCount) {
  * List all tribes
  */
 exports.listTribes = function (req, res) {
-
   Tribe.paginate(
     {
-      public: true
+      public: true,
     },
     {
       page: parseInt(req.query.page, 10) || 1, // Note: `parseInt('0')` will return `NaN`, `page` will be set to `1` in such case.
       limit: parseInt(req.query.limit, 10) || 0, // `0` for infinite
       sort: {
-        count: 'desc'
+        count: 'desc',
       },
-      select: exports.tribeFields
+      select: exports.tribeFields,
     },
     function (err, data) {
       if (err) {
         return res.status(400).send({
-          message: errorService.getErrorMessage(err)
+          message: errorService.getErrorMessage(err),
         });
       } else {
         // Pass pagination data to construct link header
@@ -62,7 +67,7 @@ exports.listTribes = function (req, res) {
 
         res.json(data.docs);
       }
-    }
+    },
   );
 };
 
@@ -80,20 +85,19 @@ exports.tribeBySlug = function (req, res, next, slug) {
   Tribe.findOne(
     {
       public: true,
-      slug: slug
+      slug,
     },
-    exports.tribeFields
-  )
-    .exec(function (err, tribe) {
-      if (err) {
-        return res.status(400).send({
-          message: errorService.getErrorMessage(err)
-        });
-      } else {
-        req.tribe = tribe;
-        return next();
-      }
-    });
+    exports.tribeFields,
+  ).exec(function (err, tribe) {
+    if (err) {
+      return res.status(400).send({
+        message: errorService.getErrorMessage(err),
+      });
+    } else {
+      req.tribe = tribe;
+      return next();
+    }
+  });
 };
 
 /**
@@ -110,8 +114,8 @@ exports.updateCount = function (id, difference, returnUpdated, callback) {
     { $inc: { count: parseInt(difference) } },
     {
       safe: false, // @link http://stackoverflow.com/a/4975054/1984644
-      new: Boolean(returnUpdated) // get the updated document in return?
+      new: Boolean(returnUpdated), // get the updated document in return?
     },
-    callback
+    callback,
   );
 };

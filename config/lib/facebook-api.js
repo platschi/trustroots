@@ -1,18 +1,16 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
-    fbgraph = require('fbgraph'),
-    path = require('path'),
-    config = require(path.resolve('./config/config'));
+const _ = require('lodash');
+const fbgraph = require('fbgraph');
+const path = require('path');
+const config = require(path.resolve('./config/config'));
 
 // Config vars
 // You can modify these from your `config/local.js`
-var fbClientID = _.get(config, 'facebook.clientID'),
-    fbClientSecret = _.get(config, 'facebook.clientSecret'),
-    fbClientAccessToken = _.get(config, 'facebook.clientAccessToken');
+const fbClientID = _.get(config, 'facebook.clientID');
+const fbClientSecret = _.get(config, 'facebook.clientSecret');
+const fbClientAccessToken = _.get(config, 'facebook.clientAccessToken');
 
 /**
  * Configure FB API version
@@ -39,7 +37,9 @@ if (fbClientID && fbClientSecret) {
    * @link https://github.com/criso/fbgraph#static-access-token-used-on-all-calls
    * @link https://developers.facebook.com/docs/facebook-login/access-tokens#apptokens
    */
-  fbgraph.setAccessToken(fbClientAccessToken || fbClientID + '|' + fbClientSecret);
+  fbgraph.setAccessToken(
+    fbClientAccessToken || fbClientID + '|' + fbClientSecret,
+  );
 
   /**
    * Facebook recommends adding the `appsecret_proof` parameter to all API calls

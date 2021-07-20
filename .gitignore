@@ -71,9 +71,13 @@ migrations/.migrate
 # User uploads
 uploads
 public/uploads-profile
+public/uploads-circle/**
 modules/users/client/img/profile/uploads # folder removed 2018-08
 
 # Jekyll files for /docs development
 docs/_site
 docs/Gemfile
 docs/Gemfile.lock
+
+# Builds
+trustroots.tar.gz*

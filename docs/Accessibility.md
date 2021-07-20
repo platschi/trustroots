@@ -1,6 +1,6 @@
 # Accessibility guide
 
-**Accessibility** is important. We want Trustroots to be inclusive and hence our websites have to be accessible to people who's abilities are limited in some way.
+**Accessibility** is important. We want Trustroots to be inclusive and hence our websites have to be accessible to people whose abilities are limited in some way.
 
 Generally speaking the status of the accessibility of Trustroots is currently unknown and should probably be assumed to be at bad state.
 
@@ -29,26 +29,30 @@ Trustroots should first get level A compliance, then work on AA and keep AA. AAA
 ## WCAG: four principles
 
 ### Principle 1: Perceivable
-* Text Alternatives: e.g. alt attributes for images
-* Time-based Media
-* Adaptable
-* Distinguishable
+
+- Text Alternatives: e.g. alt attributes for images
+- Time-based Media
+- Adaptable
+- Distinguishable
 
 ### Principle 2: Operable
-* Keyboard Accessible
-* Enough Time
-* Seizures
-* Navigable
+
+- Keyboard Accessible
+- Enough Time
+- Seizures
+- Navigable
 
 ### Principle 3: Understandable
-* Readable
-* Predictable
-* Input Assistance
 
-###  Principle 4: Robust
-* Compatible
+- Readable
+- Predictable
+- Input Assistance
+
+### Principle 4: Robust
+
+- Compatible
 
 ## Resources
-* A readable [WCAG tutorial](http://www.evengrounds.com/wcag-tutorial)
-* [a11yproject](http://a11yproject.com/): Simple articles and nice resources
-* Please familiarise yourself with [these accessibility tutorials](https://developer.mozilla.org/en-US/docs/Web/Accessibility) by Mozilla.
+
+- [a11yproject](https://www.a11yproject.com/): Simple articles and nice resources
+- Please familiarise yourself with [these accessibility tutorials](https://developer.mozilla.org/en-US/docs/Web/Accessibility) by Mozilla.

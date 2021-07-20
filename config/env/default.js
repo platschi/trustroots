@@ -12,24 +12,12 @@
 
 module.exports = {
   featureFlags: {
-    reference: false,
-    i18n: false
+    reference: true,
   },
   app: {
     title: 'Trustroots',
-    description: 'Travellers community for sharing, hosting and getting people together. We want a world that encourages trust and adventure.'
-  },
-  // Is site invitation only?
-  invitations: {
-    enabled: false,
-    // Key salt
-    key: 62618893,
-    // Id for the waiting list feature
-    // http://maitreapp.co
-    maitreId: 'MF930c37aeb3',
-    // These codes are always valid
-    // ONLY lower case
-    alwaysValidCodes: ['trustroots']
+    description:
+      'Travellers community for sharing, hosting and getting people together. We want a world that encourages trust and adventure.',
   },
 
   // Appears on top of every page for authenticated users.
@@ -39,32 +27,78 @@ module.exports = {
     enabled: false,
     // Can contain HTML
     // You can access user object like this: `{{app.user.displayName}}`
-    message: ''
+    message: '',
   },
   maxUploadSize: 10 * 1024 * 1024, // 10MB. Remember to change this to Nginx configs as well
   imageProcessor: 'graphicsmagick', // graphicsmagick|imagemagick
   uploadTmpDir: './tmp/',
   uploadDir: './public/uploads-profile',
+  circleImagesDir: './public/uploads-circle',
   port: 3000,
   host: 'localhost',
+  fd: null, // listen on a file descriptor (instead of host/port)
   https: false,
   sessionSecret: 'MEAN',
   sessionCollection: 'sessions',
   domain: 'localhost:3000',
   supportEmail: 'support@trustroots.org', // TO-address for support requests
+  supportVolunteerNames: ['Dario', 'Noah'], // Used as "from" name to send some automated emails
   surveyReactivateHosts: 'https://ideas.trustroots.org/?p=1302#page-1302', // Survey to send with host reactivation emails
   profileMinimumLength: 140, // Require User.profile.description to be >=140 chars to send messages
   // Strings not allowed as usernames and tag/tribe labels
-  illegalStrings: ['trustroots', 'trust', 'roots', 're', 're:', 'fwd', 'fwd:', 'reply', 'admin', 'administrator', 'password',
-    'username', 'unknown', 'anonymous', 'null', 'undefined', 'home', 'signup', 'signin', 'login', 'user',
-    'edit', 'settings', 'username', 'user', 'demo', 'test', 'support', 'networks', 'profile', 'avatar', 'mini',
-    'photo', 'account', 'api', 'modify', 'feedback', 'security', 'accounts', 'tribe', 'tag', 'community', 'remove'
+  illegalStrings: [
+    'account',
+    'accounts',
+    'admin',
+    'administrator',
+    'anonymous',
+    'api',
+    'avatar',
+    'circle',
+    'community',
+    'demo',
+    'edit',
+    'feedback',
+    'fwd:',
+    'fwd',
+    'home',
+    'login',
+    'mini',
+    'moderator',
+    'modify',
+    'networks',
+    'null',
+    'official',
+    'password',
+    'photo',
+    'profile',
+    're:',
+    're',
+    'remove',
+    'reply',
+    'roots',
+    'security',
+    'settings',
+    'signin',
+    'signup',
+    'support',
+    'tag',
+    'test',
+    'tribe',
+    'trust',
+    'trustroots',
+    'undefined',
+    'unknown',
+    'user',
+    'user',
+    'username',
+    'username',
   ],
   // SparkPost webhook API endpoint configuration (`/api/sparkpost/webhook`)
   sparkpostWebhook: {
     enabled: true,
     username: 'sparkpost',
-    password: 'sparkpost'
+    password: 'sparkpost',
   },
   influxdb: {
     enabled: false,
@@ -74,16 +108,18 @@ module.exports = {
       protocol: 'http', // default 'http'
       // username: '',
       // password: '',
-      database: 'trustroots'
-    }
+      database: 'trustroots',
+    },
   },
   // Configuration of stathat.
   // www.stathat.com is a tool/service for tracking statistics
   stathat: {
     enabled: false,
-    key: ''
+    key: '',
   },
   limits: {
+    // Maximum length for public feedback for an experience
+    maximumExperienceFeedbackPublicLength: 2000,
     // Messages shorter than this will be tagged 'short' in influxdb,
     // otherwise 'long'
     longMessageMinimumLength: 170,
@@ -94,8 +130,8 @@ module.exports = {
     // How long we should wait before trying to reactivate "no" hosts?
     // Moment.js `duration` object literal http://momentjs.com/docs/#/durations/
     timeToReactivateHosts: { days: 90 },
-    // How long should user have for replying a reference before it becomes public?
-    timeToReplyReference: { days: 14 },
+    // How long should user have for replying an experience before it becomes public?
+    timeToReplyExperience: { days: 14 },
     // How long should we wait to update user's seen field since the last update
     timeToUpdateLastSeenUser: { minutes: 5 },
     // when to send reminders about unread messages (since the last unread message was sent)
@@ -109,10 +145,10 @@ module.exports = {
     welcomeSequence: {
       first: { minutes: 0 },
       second: { hours: 24 },
-      third: { days: 14 }
+      third: { days: 14 },
     },
     // Up to how many days in future can meet offers be visible
-    maxOfferValidFromNow: { days: 30 }
+    maxOfferValidFromNow: { days: 30 },
   },
   mailer: {
     from: 'trustroots@localhost',
@@ -120,9 +156,9 @@ module.exports = {
       service: false,
       auth: {
         user: false,
-        pass: false
-      }
-    }
+        pass: false,
+      },
+    },
   },
   // Mapbox is publicly exposed to the frontend
   mapbox: {
@@ -130,21 +166,21 @@ module.exports = {
       streets: {
         map: 'streets-v9',
         user: 'mapbox',
-        legacy: false
+        legacy: false,
       },
       satellite: {
         map: 'satellite-streets-v9',
         user: 'mapbox',
-        legacy: false
+        legacy: false,
       },
       outdoors: {
         map: 'outdoors-v9',
         user: 'mapbox',
-        legacy: false
-      }
+        legacy: false,
+      },
     },
     user: '',
-    publicKey: ''
+    publicKey: '',
   },
   facebook: {
     page: '',
@@ -152,29 +188,29 @@ module.exports = {
     clientSecret: false,
     clientAccessToken: false,
     callbackURL: '/api/auth/facebook/callback',
-    notificationsEnabled: false
+    notificationsEnabled: false,
   },
   twitter: {
     username: '',
     clientID: '',
     clientSecret: '',
-    callbackURL: '/api/auth/twitter/callback'
+    callbackURL: '/api/auth/twitter/callback',
   },
   google: {
-    page: ''
+    page: '',
   },
   fcm: {
     senderId: '',
-    serviceAccount: false
+    serviceAccount: false,
   },
   github: {
     clientID: '',
     clientSecret: '',
-    callbackURL: '/api/auth/github/callback'
+    callbackURL: '/api/auth/github/callback',
   },
   googleAnalytics: {
     enabled: false,
-    code: ''
+    code: '',
   },
   log: {
     papertrail: {
@@ -183,7 +219,22 @@ module.exports = {
       port: false,
       level: 'debug',
       program: 'production',
-      inlineMeta: true
-    }
-  }
+      inlineMeta: true,
+    },
+  },
+  sentry: {
+    enabled: false,
+    options: {
+      dsn: '',
+      // Note: integrations are defined directly at `Sentry.init()`, don't add them here.
+    },
+  },
+  // Webpack bundle analyzer
+  // Visualize size of webpack output files with an interactive zoomable treemap.
+  // https://www.npmjs.com/package/webpack-bundle-analyzer
+  bundleAnalyzer: {
+    enabled: false,
+    // See https://github.com/webpack-contrib/webpack-bundle-analyzer#options-for-plugin
+    options: {},
+  },
 };

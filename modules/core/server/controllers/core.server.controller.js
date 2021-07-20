@@ -1,19 +1,20 @@
-'use strict';
-
-var path = require('path'),
-    errorService = require('../services/error.server.service'),
-    userProfile = require(path.resolve('./modules/users/server/controllers/users.profile.server.controller')),
-    textService = require(path.resolve('./modules/core/server/services/text.server.service')),
-    config = require(path.resolve('./config/config')),
-    log = require(path.resolve('./config/lib/logger'));
+const path = require('path');
+const errorService = require('../services/error.server.service');
+const userProfile = require(path.resolve(
+  './modules/users/server/controllers/users.profile.server.controller',
+));
+const textService = require(path.resolve(
+  './modules/core/server/services/text.server.service',
+));
+const config = require(path.resolve('./config/config'));
+const log = require(path.resolve('./config/lib/logger'));
 
 /**
  * Render the main application page
  */
 exports.renderIndex = function (req, res) {
-
-  var renderVars = {
-    user: null
+  const renderVars = {
+    user: null,
   };
 
   // Expose user
@@ -41,15 +42,15 @@ exports.renderIndex = function (req, res) {
  */
 exports.renderNotFound = function (req, res) {
   res.status(404).format({
-    'text/html': function () {
+    'text/html'() {
       res.render('404.server.view.html');
     },
-    'application/json': function () {
+    'application/json'() {
       res.json({ message: errorService.getErrorMessageByKey('not-found') });
     },
-    'default': function () {
+    default() {
       res.send(errorService.getErrorMessageByKey('not-found'));
-    }
+    },
   });
 };
 
@@ -60,7 +61,9 @@ exports.renderNotFound = function (req, res) {
 exports.receiveCSPViolationReport = function (req, res) {
   if (process.env.NODE_ENV !== 'test') {
     log('warn', 'CSP violation report #ljeanw', {
-      report: req.body ? textService.plainText(JSON.stringify(req.body)) : 'No report available.'
+      report: req.body
+        ? textService.plainText(JSON.stringify(req.body))
+        : 'No report available.',
     });
   }
   res.status(204).json();
@@ -75,16 +78,19 @@ exports.receiveCSPViolationReport = function (req, res) {
 exports.receiveExpectCTViolationReport = function (req, res) {
   if (process.env.NODE_ENV !== 'test') {
     log('warn', 'Expect-CT violation report #3hg8ha', {
-      report: req.body ? textService.plainText(JSON.stringify(req.body)) : 'No report available.'
+      report: req.body
+        ? textService.plainText(JSON.stringify(req.body))
+        : 'No report available.',
     });
   }
   res.status(204).json();
 };
 
 /**
-* Render javascript content containing service worker config.
-*/
+ * Render javascript content containing service worker config.
+ */
 exports.renderServiceWorkerConfig = function (req, res) {
-  res.set('Content-Type', 'text/javascript')
+  res
+    .set('Content-Type', 'text/javascript')
     .send('var FCM_SENDER_ID = ' + JSON.stringify(config.fcm.senderId) + ';\n');
 };

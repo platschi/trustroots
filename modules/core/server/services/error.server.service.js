@@ -1,10 +1,9 @@
-'use strict';
-
-var path = require('path'),
-    log = require(path.resolve('./config/lib/logger'));
+const path = require('path');
+const log = require(path.resolve('./config/lib/logger'));
 
 // Default error message when unsure how to respond
-var defaultErrorMessage = 'Snap! Something went wrong. If this keeps happening, please contact us.';
+const defaultErrorMessage =
+  'Snap! Something went wrong. If this keeps happening, please contact us.';
 
 /**
  * Get the error by key
@@ -14,20 +13,19 @@ var defaultErrorMessage = 'Snap! Something went wrong. If this keeps happening, 
  * @return String Error message
  */
 exports.getErrorMessageByKey = function (key) {
-
-  var errorMessages = {
+  const errorMessages = {
     'not-found': 'Not found.',
-    'forbidden': 'Forbidden.',
+    forbidden: 'Forbidden.',
     'invalid-id': 'Cannot interpret id.',
     'unprocessable-entity': 'Unprocessable Entity.', // Status 422, @link http://www.restpatterns.org/HTTP_Status_Codes/422_-_Unprocessable_Entity
     'unsupported-media-type': 'Unsupported Media Type.', // Status 415
     'bad-request': 'Bad request.', // Status 400
-    'conflict': 'Conflict.', // Status 409
-    'suspended': 'Your account has been suspended.',
-    'default': defaultErrorMessage
+    conflict: 'Conflict.', // Status 409
+    suspended: 'Your account has been suspended.',
+    default: defaultErrorMessage,
   };
 
-  return (key && errorMessages[key]) ? errorMessages[key] : defaultErrorMessage;
+  return key && errorMessages[key] ? errorMessages[key] : defaultErrorMessage;
 };
 
 /**
@@ -38,9 +36,8 @@ exports.getErrorMessageByKey = function (key) {
  * @return Error
  */
 exports.getNewError = function (key, status) {
-
-  var message = this.getErrorMessageByKey(key),
-      err = new Error(message);
+  const message = this.getErrorMessageByKey(key);
+  const err = new Error(message);
 
   if (status) err.status = status;
 
@@ -53,9 +50,9 @@ exports.getNewError = function (key, status) {
  * @return String Error message
  */
 exports.getErrorMessage = function (err) {
-  var message = false;
+  let message = false;
 
-  for (var errName in err.errors) {
+  for (const errName in err.errors) {
     if (err.errors[errName].message) message = err.errors[errName].message;
   }
 
@@ -66,7 +63,6 @@ exports.getErrorMessage = function (err) {
  * Error responses middleware
  */
 exports.errorResponse = function (err, req, res, next) {
-
   // If the error object doesn't exists
   if (!err) return next();
 
@@ -74,8 +70,8 @@ exports.errorResponse = function (err, req, res, next) {
   log('error', 'API error response', err.stack);
 
   // Construct error response
-  var errorResponse = {
-    message: err.message || defaultErrorMessage
+  const errorResponse = {
+    message: err.message || defaultErrorMessage,
   };
 
   // In development mode, pass the error with the response
@@ -85,15 +81,14 @@ exports.errorResponse = function (err, req, res, next) {
 
   // Do content negotiation and return a message
   return res.status(err.status || 500).format({
-    'text/html': function () {
+    'text/html'() {
       res.render('500.server.view.html');
     },
-    'application/json': function () {
+    'application/json'() {
       res.json(errorResponse);
     },
-    'default': function () {
+    default() {
       res.send(errorResponse.message);
-    }
+    },
   });
-
 };

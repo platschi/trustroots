@@ -27,12 +27,15 @@ title: Trustroots Team Guide
 - [Mobile app source code](https://github.com/trustroots/trustroots-expo-mobile)
 
 ## Guides
+
+- [Adding new volunteer](Adding-new-volunteer.md)
 - [Design principles](Design-principles.md)
 - [Photos](Photos.md)
 
 ## Documentation
 
 ### Basics
+
 - [Accessibility](Accessibility.md)
 - [Getting started troubleshooting](Troubleshooting.md)
 - [We are moving to React](React.md)
@@ -40,9 +43,9 @@ title: Trustroots Team Guide
 - [Pull request workflow](Pull-Request-Workflow.md)
 
 ### In-depth documentation
+
 - [Angular Directives](Angular-Directives.md) (deprecated)
 - [App and server Monitoring](Monitoring.md)
-- [Database](Database.md)
 - [i18n](i18n.md)
 - [Icons](Icons.md)
 - [InfluxDB](InfluxDB.md)
@@ -51,6 +54,7 @@ title: Trustroots Team Guide
 - [Server](Server.md)
 
 ## More information
+
 - [Privacy Policy](Privacy-Policy.md)
 - Logos and other graphics from [media repository](https://github.com/trustroots/media)
 - [Trustroots in Media](https://www.trustroots.org/media)
@@ -71,4 +75,4 @@ Is Trustroots.org down or is it just me? Check
 
 - [Contact us via our support form](https://www.trustroots.org/contact).
 - We are using [chat](Chat.md) for volunteer, day-to-day communications.
-- It's also great if you join the [hacker tribe](https://www.trustroots.org/tribes/hackers)!
+- It's also great if you join the [hacker circle](https://www.trustroots.org/circles/hackers)!

@@ -1,30 +1,24 @@
-(function () {
-  'use strict';
+/**
+ * TODO remove this controller
+ * https://github.com/Trustroots/trustroots/pull/1145#discussion_r364183325
+ */
 
-  angular
-    .module('tribes')
-    .controller('TribesListController', TribesListController);
+angular
+  .module('tribes')
+  .controller('TribesListController', TribesListController);
 
-  /* @ngInject */
-  function TribesListController(tribes, $state, Authentication, TribeService) {
+/* @ngInject */
+function TribesListController(Authentication, $rootScope) {
+  // ViewModel
+  const vm = this;
 
-    // ViewModel
-    var vm = this;
-
-    // Exposed to the view
-    vm.tribes = tribes;
-    vm.user = Authentication.user;
-    vm.openTribe = openTribe;
-
-    /**
-     * Open tribe
-     */
-    function openTribe(tribe) {
-      // Put tribe object to cache to be used after page transition has
-      // finished, thus no need to reload tribe from the API
-      TribeService.fillCache(angular.copy(tribe));
-      $state.go('tribes.tribe', { 'tribe': tribe.slug });
+  /**
+   * Update the Authentication.user with updated tribe membership
+   */
+  vm.broadcastUpdatedUser = function (data) {
+    if (data.user) {
+      Authentication.user = data.user;
+      $rootScope.$broadcast('userUpdated');
     }
-  }
-
-}());
+  };
+}

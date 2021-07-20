@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Stats
  *
@@ -26,12 +24,12 @@
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
-    async = require('async'),
-    // path = require('path'),
-    // config = require(path.resolve('./config/config')),
-    influxService = require('./influx.server.service.js'),
-    stathatService = require('./stathat.server.service.js');
+const _ = require('lodash');
+const async = require('async');
+// path = require('path'),
+// config = require(path.resolve('./config/config')),
+const influxService = require('./influx.server.service.js');
+const stathatService = require('./stathat.server.service.js');
 
 /**
  * The object which stats api .stat method expects as parameter
@@ -78,14 +76,13 @@ var _ = require('lodash'),
  */
 
 /**
-  * Record a simple "count" stat
-  * @param {string} name - stat name
-  * @param {number} [count] - stat value, default 1
-  * @param {Date} [time]
-  * @param {statCallback} callback - last argument (2nd, 3rd or 4th)
+ * Record a simple "count" stat
+ * @param {string} name - stat name
+ * @param {number} [count] - stat value, default 1
+ * @param {Date} [time]
+ * @param {statCallback} callback - last argument (2nd, 3rd or 4th)
  */
 function count(name, count, time, callback) {
-
   // make the count optional and callback as the last argument
   if (arguments.length === 2 && _.isFunction(count)) {
     callback = count;
@@ -102,27 +99,28 @@ function count(name, count, time, callback) {
   count = count || 1;
   callback = callback || function () {};
 
-  var statObject = {
+  const statObject = {
     namespace: name,
     counts: {
-      count: count
-    }
+      count,
+    },
   };
 
-  if (time) { statObject.time = time; }
+  if (time) {
+    statObject.time = time;
+  }
 
   stat(statObject, callback);
 }
 
 /**
-  * Record a simple "value" stat
-  * @param {string} name - stat name
-  * @param {number} value - stat value
-  * @param {Date} [time]
-  * @param {statCallback} callback - last argument (3rd or 4th)
+ * Record a simple "value" stat
+ * @param {string} name - stat name
+ * @param {number} value - stat value
+ * @param {Date} [time]
+ * @param {statCallback} callback - last argument (3rd or 4th)
  */
 function value(name, value, time, callback) {
-
   // make the time optional
   if (arguments.length === 3 && _.isFunction(time)) {
     callback = time;
@@ -133,11 +131,11 @@ function value(name, value, time, callback) {
   callback = callback || function () {};
 
   // construct and send the stat
-  var statObject = {
+  const statObject = {
     namespace: name,
     values: {
-      value: value
-    }
+      value,
+    },
   };
 
   if (time) statObject.time = time;
@@ -159,10 +157,12 @@ function validateStat(stat) {
   }
 
   // We must have at least one of `counts` or `values`, or both
-  var isCountsAndValuesMissing = _.isUndefined(stat.counts) && _.isUndefined(stat.values);
+  const isCountsAndValuesMissing =
+    _.isUndefined(stat.counts) && _.isUndefined(stat.values);
   // @TODO check that they are plain objects or undefined with _.isPlainObject()
   // counts or values have to contain at least 1 property
-  var isCountsAndValuesEmpty = _.keys(stat.counts).length + _.keys(stat.values).length === 0;
+  const isCountsAndValuesEmpty =
+    _.keys(stat.counts).length + _.keys(stat.values).length === 0;
   if (isCountsAndValuesMissing || isCountsAndValuesEmpty) {
     // error
     throw new Error('The stat should contain counts or values');
@@ -174,38 +174,38 @@ function validateStat(stat) {
   function areKeysUnique() {
     // keys is an array of arrays of keys of all objects passed as arguments
     // to the function
-    var keys = [];
-    var keyLength = 0;
+    const keys = [];
+    let keyLength = 0;
 
-    for (var i = 0, len = arguments.length; i < len; i++) {
-      var currentKeys = _.keys(arguments[i]);
+    for (let i = 0, len = arguments.length; i < len; i++) {
+      const currentKeys = _.keys(arguments[i]);
       keys.push(currentKeys);
       keyLength += currentKeys.length;
     }
 
-    var unionKeys = _.union.apply(this, keys);
+    const unionKeys = _.union.apply(this, keys);
 
     return keyLength === unionKeys.length;
   }
 
   if (!areKeysUnique(stat.counts, stat.values, stat.meta, stat.tags)) {
-    throw new Error('Every key of stat counts, values, meta and tags must be unique');
+    throw new Error(
+      'Every key of stat counts, values, meta and tags must be unique',
+    );
   }
 
   // Every value in 'counts' and 'values' should be a number
-  var vals = _.concat(_.values(stat.counts), _.values(stat.values));
+  const vals = _.concat(_.values(stat.counts), _.values(stat.values));
 
-  var areNumbers = _.every(vals, _.isNumber);
+  const areNumbers = _.every(vals, _.isNumber);
 
   if (!areNumbers) {
     throw new Error('Each of counts and values should be a number');
   }
 
   // time, if provided, should be of type Date
-  if (stat.hasOwnProperty('time')) {
-    if (!_.isDate(stat.time)) {
-      throw new Error('Time must be a Date object or not provided');
-    }
+  if (_.has(stat, 'time') && !_.isDate(stat.time)) {
+    throw new Error('Time must be a Date object or not provided');
   }
 }
 
@@ -277,8 +277,8 @@ function stat(stat, callback) {
   // send the stat to InfluxDB
   // send the stat to Stathat
   // let them both finish or fail and then report errors
-  var influxErr,
-      stathatErr;
+  let influxErr;
+  let stathatErr;
 
   // The wrap functions keep the errors in influxErr and stathatErr
   // and always finish without failing. Why? We want to finish all and report
@@ -298,22 +298,28 @@ function stat(stat, callback) {
     });
   }
 
-  async.applyEach([stathatServiceStatWrap, influxServiceStatWrap], stat, function (e) {
-    if (e) return callback(e); // this should not happen
+  async.applyEach(
+    [stathatServiceStatWrap, influxServiceStatWrap],
+    stat,
+    function (e) {
+      if (e) return callback(e); // this should not happen
 
-    if (influxErr || stathatErr) {
-      var finalErr = new Error('Writing to Influx or Stathat service failed.');
+      if (influxErr || stathatErr) {
+        const finalErr = new Error(
+          'Writing to Influx or Stathat service failed.',
+        );
 
-      finalErr.errors = {
-        influx: influxErr,
-        stathat: stathatErr
-      };
+        finalErr.errors = {
+          influx: influxErr,
+          stathat: stathatErr,
+        };
 
-      return callback(finalErr);
-    }
+        return callback(finalErr);
+      }
 
-    return callback();
-  });
+      return callback();
+    },
+  );
 }
 
 // Public exports

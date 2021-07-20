@@ -1,51 +1,47 @@
-(function () {
-  'use strict';
+// Offers service used for communicating with the offers REST endpoints
+angular.module('offers').factory('OffersService', OffersService);
 
-  // Offers service used for communicating with the offers REST endpoints
-  angular
-    .module('offers')
-    .factory('OffersService', OffersService);
-
-  /* @ngInject */
-  function OffersService($resource) {
-    var Offer = $resource('/api/offers/:offerId', {
-      offerId: '@_id'
-    }, {
+/* @ngInject */
+function OffersService($resource) {
+  const Offer = $resource(
+    '/api/offers/:offerId',
+    {
+      offerId: '@_id',
+    },
+    {
       get: {
         method: 'GET',
-        cancellable: true
+        cancellable: true,
       },
       update: {
-        method: 'PUT'
+        method: 'PUT',
       },
       save: {
-        method: 'POST'
+        method: 'POST',
       },
       delete: {
-        method: 'DELETE'
-      }
-    });
+        method: 'DELETE',
+      },
+    },
+  );
 
-    angular.extend(Offer.prototype, {
-      createOrUpdate: function () {
-        var offer = this;
-        return createOrUpdate(offer);
-      }
-    });
+  angular.extend(Offer.prototype, {
+    createOrUpdate() {
+      const offer = this;
+      return createOrUpdate(offer);
+    },
+  });
 
-    return Offer;
+  return Offer;
 
-    /**
-     * Update if offer has `_id` and otherwise save it as new offer
-     */
-    function createOrUpdate(offer) {
-      if (offer._id) {
-        return offer.$update();
-      } else {
-        return offer.$save();
-      }
+  /**
+   * Update if offer has `_id` and otherwise save it as new offer
+   */
+  function createOrUpdate(offer) {
+    if (offer._id) {
+      return offer.$update();
+    } else {
+      return offer.$save();
     }
-
   }
-
-}());
+}

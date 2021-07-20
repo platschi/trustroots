@@ -1,26 +1,25 @@
-'use strict';
+const should = require('should');
+const request = require('supertest');
+const path = require('path');
+const mongoose = require('mongoose');
+const express = require(path.resolve('./config/lib/express'));
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
 
-var should = require('should'),
-    request = require('supertest'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    express = require(path.resolve('./config/lib/express'));
+const User = mongoose.model('User');
 
 /**
  * Globals
  */
-var app,
-    agent,
-    credentials,
-    user,
-    _user;
+let app;
+let agent;
+let credentials;
+let user;
+let _user;
 
 /**
  * User routes tests
  */
 describe('User password CRUD tests', function () {
-
   before(function (done) {
     // Get application
     app = express.init(mongoose.connection);
@@ -35,7 +34,7 @@ describe('User password CRUD tests', function () {
     // Create user credentials
     credentials = {
       username: 'TR_username',
-      password: 'TR-I$Aw3$0m4'
+      password: 'TR-I$Aw3$0m4',
     };
 
     // Create a new user
@@ -48,7 +47,7 @@ describe('User password CRUD tests', function () {
       emailToken: 'initial email token',
       username: credentials.username.toLowerCase(),
       password: credentials.password,
-      provider: 'local'
+      provider: 'local',
     };
 
     user = new User(_user);
@@ -57,14 +56,17 @@ describe('User password CRUD tests', function () {
     user.save(done);
   });
 
+  afterEach(utils.clearDatabase);
+
   it('forgot password should return 400 for non-existent username', function (done) {
     user.roles = ['user'];
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: 'some_username_that_doesnt_exist'
+          username: 'some_username_that_doesnt_exist',
         })
         .expect(404)
         .end(function (err, res) {
@@ -73,22 +75,25 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.equal('We could not find an account with that username or email. Make sure you have it spelled correctly.');
+          res.body.message.should.equal(
+            'We could not find an account with that username or email. Make sure you have it spelled correctly.',
+          );
           return done();
         });
     });
   });
 
   it('forgot password should return 400 for no username provided', function (done) {
-    var provider = 'facebook';
+    const provider = 'facebook';
     user.provider = provider;
     user.roles = ['user'];
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: ''
+          username: '',
         })
         .expect(400)
         .end(function (err, res) {
@@ -97,7 +102,9 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.equal('Please, we really need your username or email first...');
+          res.body.message.should.equal(
+            'Please, we really need your username or email first...',
+          );
           return done();
         });
     });
@@ -108,9 +115,10 @@ describe('User password CRUD tests', function () {
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.username
+          username: user.username,
         })
         .expect(200)
         .end(function (err, res) {
@@ -119,13 +127,18 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.be.equal('We sent you an email with further instructions.');
+          res.body.message.should.be.equal(
+            'We sent you an email with further instructions.',
+          );
 
-          User.findOne({ username: user.username.toLowerCase() }, function (err, userRes) {
-            userRes.resetPasswordToken.should.not.be.empty();
-            should.exist(userRes.resetPasswordExpires);
-            return done();
-          });
+          User.findOne(
+            { username: user.username.toLowerCase() },
+            function (err, userRes) {
+              userRes.resetPasswordToken.should.not.be.empty();
+              should.exist(userRes.resetPasswordExpires);
+              return done();
+            },
+          );
         });
     });
   });
@@ -135,9 +148,10 @@ describe('User password CRUD tests', function () {
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.username.toUpperCase()
+          username: user.username.toUpperCase(),
         })
         .expect(200)
         .end(function (err, res) {
@@ -146,13 +160,18 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.be.equal('We sent you an email with further instructions.');
+          res.body.message.should.be.equal(
+            'We sent you an email with further instructions.',
+          );
 
-          User.findOne({ username: user.username.toLowerCase() }, function (err, userRes) {
-            userRes.resetPasswordToken.should.not.be.empty();
-            should.exist(userRes.resetPasswordExpires);
-            return done();
-          });
+          User.findOne(
+            { username: user.username.toLowerCase() },
+            function (err, userRes) {
+              userRes.resetPasswordToken.should.not.be.empty();
+              should.exist(userRes.resetPasswordExpires);
+              return done();
+            },
+          );
         });
     });
   });
@@ -162,9 +181,10 @@ describe('User password CRUD tests', function () {
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.email
+          username: user.email,
         })
         .expect(200)
         .end(function (err, res) {
@@ -173,13 +193,18 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.be.equal('We sent you an email with further instructions.');
+          res.body.message.should.be.equal(
+            'We sent you an email with further instructions.',
+          );
 
-          User.findOne({ email: user.email.toLowerCase() }, function (err, userRes) {
-            userRes.resetPasswordToken.should.not.be.empty();
-            should.exist(userRes.resetPasswordExpires);
-            return done();
-          });
+          User.findOne(
+            { email: user.email.toLowerCase() },
+            function (err, userRes) {
+              userRes.resetPasswordToken.should.not.be.empty();
+              should.exist(userRes.resetPasswordExpires);
+              return done();
+            },
+          );
         });
     });
   });
@@ -189,9 +214,10 @@ describe('User password CRUD tests', function () {
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.email.toUpperCase()
+          username: user.email.toUpperCase(),
         })
         .expect(200)
         .end(function (err, res) {
@@ -200,13 +226,18 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          res.body.message.should.be.equal('We sent you an email with further instructions.');
+          res.body.message.should.be.equal(
+            'We sent you an email with further instructions.',
+          );
 
-          User.findOne({ email: user.email.toLowerCase() }, function (err, userRes) {
-            userRes.resetPasswordToken.should.not.be.empty();
-            should.exist(userRes.resetPasswordExpires);
-            return done();
-          });
+          User.findOne(
+            { email: user.email.toLowerCase() },
+            function (err, userRes) {
+              userRes.resetPasswordToken.should.not.be.empty();
+              should.exist(userRes.resetPasswordExpires);
+              return done();
+            },
+          );
         });
     });
   });
@@ -216,9 +247,10 @@ describe('User password CRUD tests', function () {
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.username
+          username: user.username,
         })
         .expect(200)
         .end(function (err) {
@@ -227,33 +259,39 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          User.findOne({ username: user.username.toLowerCase() }, function (err, userRes) {
-            userRes.resetPasswordToken.should.not.be.empty();
-            should.exist(userRes.resetPasswordExpires);
-            agent.get('/api/auth/reset/' + userRes.resetPasswordToken)
-              .expect(302)
-              .end(function (err, res) {
-              // Handle error
-                if (err) {
-                  return done(err);
-                }
-                res.headers.location.should.be.equal('/password/reset/' + userRes.resetPasswordToken);
-                return done();
-              });
-          });
+          User.findOne(
+            { username: user.username.toLowerCase() },
+            function (err, userRes) {
+              userRes.resetPasswordToken.should.not.be.empty();
+              should.exist(userRes.resetPasswordExpires);
+              agent
+                .get('/api/auth/reset/' + userRes.resetPasswordToken)
+                .expect(302)
+                .end(function (err, res) {
+                  // Handle error
+                  if (err) {
+                    return done(err);
+                  }
+                  res.headers.location.should.be.equal(
+                    '/password/reset/' + userRes.resetPasswordToken,
+                  );
+                  return done();
+                });
+            },
+          );
         });
     });
   });
-
 
   it('forgot password should return error when using invalid reset token', function (done) {
     user.roles = ['user'];
 
     user.save(function (err) {
       should.not.exist(err);
-      agent.post('/api/auth/forgot')
+      agent
+        .post('/api/auth/forgot')
         .send({
-          username: user.username
+          username: user.username,
         })
         .expect(200)
         .end(function (err) {
@@ -262,11 +300,12 @@ describe('User password CRUD tests', function () {
             return done(err);
           }
 
-          var invalidToken = 'someTOKEN1234567890';
-          agent.get('/api/auth/reset/' + invalidToken)
+          const invalidToken = 'someTOKEN1234567890';
+          agent
+            .get('/api/auth/reset/' + invalidToken)
             .expect(302)
             .end(function (err, res) {
-            // Handle error
+              // Handle error
               if (err) {
                 return done(err);
               }
@@ -280,7 +319,8 @@ describe('User password CRUD tests', function () {
   });
 
   it('should be able to change password successfully', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -290,11 +330,12 @@ describe('User password CRUD tests', function () {
         }
 
         // Change password
-        agent.post('/api/users/password')
+        agent
+          .post('/api/users/password')
           .send({
             newPassword: '1234567890Aa$',
             verifyPassword: '1234567890Aa$',
-            currentPassword: credentials.password
+            currentPassword: credentials.password,
           })
           .expect(200)
           .end(function (err, res) {
@@ -309,7 +350,8 @@ describe('User password CRUD tests', function () {
   });
 
   it('should not be able to change password if wrong verifyPassword is given', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -319,11 +361,12 @@ describe('User password CRUD tests', function () {
         }
 
         // Change password
-        agent.post('/api/users/password')
+        agent
+          .post('/api/users/password')
           .send({
             newPassword: '1234567890Aa$',
             verifyPassword: '1234567890-ABC-123-Aa$',
-            currentPassword: credentials.password
+            currentPassword: credentials.password,
           })
           .expect(400)
           .end(function (err, res) {
@@ -338,7 +381,8 @@ describe('User password CRUD tests', function () {
   });
 
   it('should not be able to change password if wrong currentPassword is given', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -348,11 +392,12 @@ describe('User password CRUD tests', function () {
         }
 
         // Change password
-        agent.post('/api/users/password')
+        agent
+          .post('/api/users/password')
           .send({
             newPassword: '1234567890Aa$',
             verifyPassword: '1234567890Aa$',
-            currentPassword: 'some_wrong_passwordAa$'
+            currentPassword: 'some_wrong_passwordAa$',
           })
           .expect(400)
           .end(function (err, res) {
@@ -367,7 +412,8 @@ describe('User password CRUD tests', function () {
   });
 
   it('should not be able to change password if no new password is at all given', function (done) {
-    agent.post('/api/auth/signin')
+    agent
+      .post('/api/auth/signin')
       .send(credentials)
       .expect(200)
       .end(function (signinErr) {
@@ -377,11 +423,12 @@ describe('User password CRUD tests', function () {
         }
 
         // Change password
-        agent.post('/api/users/password')
+        agent
+          .post('/api/users/password')
           .send({
             newPassword: '',
             verifyPassword: '',
-            currentPassword: credentials.password
+            currentPassword: credentials.password,
           })
           .expect(400)
           .end(function (err, res) {
@@ -396,13 +443,13 @@ describe('User password CRUD tests', function () {
   });
 
   it('should not be able to change password if no new password is at all given', function (done) {
-
     // Change password
-    agent.post('/api/users/password')
+    agent
+      .post('/api/users/password')
       .send({
         newPassword: '1234567890Aa$',
         verifyPassword: '1234567890Aa$',
-        currentPassword: credentials.password
+        currentPassword: credentials.password,
       })
       .expect(403)
       .end(function (err, res) {
@@ -413,9 +460,5 @@ describe('User password CRUD tests', function () {
         res.body.message.should.equal('Forbidden.');
         return done();
       });
-  });
-
-  afterEach(function (done) {
-    User.deleteMany().exec(done);
   });
 });

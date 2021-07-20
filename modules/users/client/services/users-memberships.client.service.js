@@ -1,25 +1,24 @@
-(function () {
-  'use strict';
+angular
+  .module('users')
+  .factory('UserMembershipsService', UserMembershipsService);
 
-  angular
-    .module('users')
-    .factory('UserMembershipsService', UserMembershipsService);
-
-  /* @ngInject */
-  function UserMembershipsService($resource) {
-    return $resource('/api/users/memberships/:tribeId?', {
-      tribeId: '@tribeId'
-    }, {
+/* @ngInject */
+function UserMembershipsService($resource) {
+  return $resource(
+    '/api/users/memberships/:tribeId?',
+    {
+      tribeId: '@tribeId',
+    },
+    {
       post: {
-        method: 'POST'
+        method: 'POST',
       },
       delete: {
-        method: 'DELETE'
+        method: 'DELETE',
       },
       get: {
-        method: 'GET'
-      }
-    });
-  }
-
-}());
+        method: 'GET',
+      },
+    },
+  );
+}

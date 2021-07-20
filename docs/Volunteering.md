@@ -15,19 +15,20 @@ Please start by joining our [volunteer chat](Chat.md). You should start by intro
 - [Development](Development-Getting-Started.md).
 - [Design](Design-Getting-Started.md).
 - [Support](Support-Getting-Started.md).
+- [Translating](Translating-Getting-Started.md).
 - [Photography](Photography-Getting-Started.md).
 - [Copywriting & Proofreading](Copywriting-Getting-Started.md).
 - [Social Media](Social-Media-Getting-Started.md).
 - [Legal](Legal-Getting-Started.md).
 - Other? If you have ideas, please let us know!
 
-Some of the easiest ways to help *right now* are:
+Some of the easiest ways to help _right now_ are:
 
 **Use the website:** travel and host! Test it out with different mobile devices, browsers, and screen sizes. Report bugs by opening [an issue on GitHub](https://github.com/Trustroots/trustroots/issues/new) or [drop us a message](https://www.trustroots.org/contact).
 
-**Got Space?** Let us know if you have a space at your disposal that you want to provide to a Trustroots collective or a Hackathon. Check out some <a href="http://nomadwiki.org/en/Trustroots_Iberian_Collective_2018">previous</a> Trustroots spaces.
+**Got Space?** Let us know if you have a space at your disposal that you want to provide to a Trustroots collective or a Hackathon. Check out some <a href="https://nomadwiki.org/en/Trustroots_Iberian_Collective_2018">previous</a> Trustroots spaces.
 
-**Spread the word!** Honestly, the biggest thing that helps us is helping more people find out about Trustroots. Tell your friends and fellow travellers about Trustroots and tag us on social media. You can follow us on [Twitter](https://twitter.com/trustroots), [Instagram](https://www.instagram.com/trustroots_org/), [Facebook](https://www.facebook.com/trustroots.org/) and our [blog](https://ideas.trustroots.org/).
+**Spread the word!** Honestly, the biggest thing that helps us is helping more people find out about Trustroots. Tell your friends and fellow travellers about Trustroots and tag us on social media. You can follow us on [Twitter](https://twitter.com/trustroots), [Instagram](https://www.instagram.com/trustroots/), [Facebook](https://www.facebook.com/trustroots.org/) and our [blog](https://ideas.trustroots.org/).
 
 If you write a post about Trustroots on your blog, definitely [let us know](https://www.trustroots.org/contact) so that we can share it.
 

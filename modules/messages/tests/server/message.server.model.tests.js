@@ -1,27 +1,26 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
-var should = require('should'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    Message = mongoose.model('Message');
+const should = require('should');
+const mongoose = require('mongoose');
+const path = require('path');
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
+
+const User = mongoose.model('User');
+const Message = mongoose.model('Message');
 
 /**
  * Globals
  */
-var userTo,
-    userFrom,
-    message;
+let userTo;
+let userFrom;
+let message;
 
 /**
  * Unit tests
  */
 describe('Message Model Unit Tests:', function () {
-
   beforeEach(function (done) {
-
     userFrom = new User({
       firstName: 'Full',
       lastName: 'Name',
@@ -29,7 +28,7 @@ describe('Message Model Unit Tests:', function () {
       email: 'test1@test.com',
       username: 'username1',
       password: 'password123',
-      provider: 'local'
+      provider: 'local',
     });
     userTo = new User({
       firstName: 'Full',
@@ -38,24 +37,25 @@ describe('Message Model Unit Tests:', function () {
       email: 'test2@test.com',
       username: 'username2',
       password: 'password123',
-      provider: 'local'
+      provider: 'local',
     });
+
+    afterEach(utils.clearDatabase);
 
     // Create users
     userFrom.save(function () {
       userTo.save(function () {
         // Check id for userTo
-        User.findOne({ 'username': userTo.username }, function (err, userTo) {
+        User.findOne({ username: userTo.username }, function (err, userTo) {
           // Create message & continue
           message = new Message({
             content: 'Message content',
             userTo: userTo._id,
-            read: false
+            read: false,
           });
           return done();
         });
       });
-
     });
   });
 
@@ -83,13 +83,6 @@ describe('Message Model Unit Tests:', function () {
         should.exist(err);
         return done();
       });
-    });
-
-  });
-
-  afterEach(function (done) {
-    Message.deleteMany().exec(function () {
-      User.deleteMany().exec(done);
     });
   });
 });

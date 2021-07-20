@@ -1,22 +1,24 @@
+@import '~less/global-variables';
+@import '~bootstrap/less/mixins/vendor-prefixes';
+
 /*
  * Modified from https://raw.githubusercontent.com/harvesthq/chosen/master/sass/chosen.scss
  * Requires Bootstrap3 mixins
  */
-
-@chosen-sprite: '/modules/core/img/chosen-js/chosen-sprite.png';
-@chosen-sprite-retina: '/modules/core/img/chosen-js/chosen-sprite@2x.png';
+@chosen-sprite: url('~chosen-js/chosen-sprite.png');
+@chosen-sprite-retina: url('~chosen-js/chosen-sprite@2x.png');
 
 // Adapted from
 // https://github.com/localytics/angular-chosen/blob/master/chosen-spinner.css
 .localytics-chosen.loading {
   &.chosen-container-multi .chosen-choices {
-    background-image: url('/modules/core/img/angular-chosen-localytics/spinner.gif');
+    background-image: url('~angular-chosen-localytics/spinner.gif');
     background-repeat: no-repeat;
     background-position: 95%;
   }
   &.chosen-container-single .chosen-single {
     span {
-      background: url('/modules/core/img/angular-chosen-localytics/spinner.gif') no-repeat right;
+      background: url('~angular-chosen-localytics/spinner.gif') no-repeat right;
     }
     .search-choice-close {
       display: none;
@@ -45,7 +47,7 @@
     border: 1px solid @input-border;
     border-top: 0;
     background: #fff;
-    box-shadow: 0 4px 5px rgba(0, 0, 0, .15);
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.15);
   }
   &.chosen-with-drop .chosen-drop {
     left: 0;
@@ -53,7 +55,8 @@
   a {
     cursor: pointer;
   }
-  .search-choice, .chosen-single {
+  .search-choice,
+  .chosen-single {
     .group-name {
       margin-right: 4px;
       overflow: hidden;
@@ -62,7 +65,7 @@
       font-weight: normal;
       color: #999999;
       &:after {
-        content: ":";
+        content: ':';
         padding-left: 2px;
         vertical-align: top;
       }
@@ -83,7 +86,7 @@
     border-radius: 5px;
     background-color: #fff;
     background-clip: padding-box;
-    box-shadow: 0 0 3px #fff inset, 0 1px 1px rgba(0, 0, 0, .1);
+    box-shadow: 0 0 3px #fff inset, 0 1px 1px rgba(0, 0, 0, 0.1);
     color: @input-color;
     text-decoration: none;
     white-space: nowrap;
@@ -109,7 +112,7 @@
     display: block;
     width: 12px;
     height: 12px;
-    background: url(@chosen-sprite) -42px 1px no-repeat;
+    background: @chosen-sprite -42px 1px no-repeat;
     font-size: 1px;
     &:hover {
       background-position: -42px -10px;
@@ -129,7 +132,7 @@
       display: block;
       width: 100%;
       height: 100%;
-      background: url(@chosen-sprite) no-repeat 0px 2px;
+      background: @chosen-sprite no-repeat 0px 2px;
     }
   }
   .chosen-search {
@@ -138,14 +141,14 @@
     margin: 0;
     padding: 3px 4px;
     white-space: nowrap;
-    input[type="text"] {
+    input[type='text'] {
       margin: 1px 0;
       padding: 4px 20px 4px 5px;
       width: 100%;
       height: auto;
       outline: 0;
       border: 1px solid @input-border;
-      background: #fff url(@chosen-sprite) no-repeat 100% -20px;
+      background: #fff @chosen-sprite no-repeat 100% -20px;
       font-size: 1em;
       font-family: sans-serif;
       line-height: normal;
@@ -238,7 +241,7 @@
       margin: 0;
       padding: 0;
       white-space: nowrap;
-      input[type="text"] {
+      input[type='text'] {
         margin: 1px 0;
         padding: 0;
         height: 25px;
@@ -277,7 +280,7 @@
         display: block;
         width: 12px;
         height: 12px;
-        background: url(@chosen-sprite) -42px 1px no-repeat;
+        background: @chosen-sprite -42px 1px no-repeat;
         font-size: 1px;
         &:hover {
           background-position: -42px -10px;
@@ -310,12 +313,12 @@
 
 /* @group Active  */
 /* @todo Use .form-control-focus(); here instead? */
-.chosen-container-active{
+.chosen-container-active {
   .chosen-single {
     border: 1px solid @input-border-focus;
-    box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   }
-  &.chosen-with-drop{
+  &.chosen-with-drop {
     .chosen-single {
       border: 1px solid @input-border;
       border-bottom-right-radius: 0;
@@ -332,7 +335,7 @@
   }
   .chosen-choices {
     border: 1px solid @input-border-focus;
-    li.search-field input[type="text"] {
+    li.search-field input[type='text'] {
       color: @input-color !important;
     }
   }
@@ -377,7 +380,7 @@
   }
   .chosen-choices li {
     float: right;
-    &.search-field input[type="text"] {
+    &.search-field input[type='text'] {
       direction: rtl;
     }
     &.search-choice {
@@ -404,9 +407,9 @@
   &.chosen-container-active.chosen-with-drop .chosen-single div {
     border-right: none;
   }
-  .chosen-search input[type="text"] {
+  .chosen-search input[type='text'] {
     padding: 4px 5px 4px 20px;
-    background: #fff url(@chosen-sprite) no-repeat -30px -20px;
+    background: #fff @chosen-sprite no-repeat -30px -20px;
     direction: rtl;
   }
   &.chosen-container-single {
@@ -423,15 +426,17 @@
 /* @end */
 
 /* @group Retina compatibility */
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi), only screen and (min-resolution: 1.5dppx) {
-  .chosen-rtl .chosen-search input[type="text"],
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+  only screen and (min-resolution: 144dpi),
+  only screen and (min-resolution: 1.5dppx) {
+  .chosen-rtl .chosen-search input[type='text'],
   .chosen-container-single .chosen-single abbr,
   .chosen-container-single .chosen-single div b,
-  .chosen-container-single .chosen-search input[type="text"],
+  .chosen-container-single .chosen-search input[type='text'],
   .chosen-container-multi .chosen-choices .search-choice .search-choice-close,
   .chosen-container .chosen-results-scroll-down span,
   .chosen-container .chosen-results-scroll-up span {
-    background-image: url(@chosen-sprite-retina) !important;
+    background-image: @chosen-sprite-retina !important;
     background-size: 52px 37px !important;
     background-repeat: no-repeat !important;
   }

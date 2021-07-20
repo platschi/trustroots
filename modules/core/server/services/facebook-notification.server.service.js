@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * This is used to send Facebook notifications for users who have connected
  * the app to their Facebook accounts.
@@ -12,16 +10,22 @@
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
-    path = require('path'),
-    async = require('async'),
-    analyticsHandler = require(path.resolve('./modules/core/server/controllers/analytics.server.controller')),
-    config = require(path.resolve('./config/config')),
-    render = require(path.resolve('./config/lib/render')),
-    agenda = require(path.resolve('./config/lib/agenda'));
+const _ = require('lodash');
+const path = require('path');
+const async = require('async');
+const analyticsHandler = require(path.resolve(
+  './modules/core/server/controllers/analytics.server.controller',
+));
+const config = require(path.resolve('./config/config'));
+const render = require(path.resolve('./config/lib/render'));
+const agenda = require(path.resolve('./config/lib/agenda'));
 
-exports.notifyMessagesUnread = function (userFrom, userTo, notification, callback) {
-
+exports.notifyMessagesUnread = function (
+  userFrom,
+  userTo,
+  notification,
+  callback,
+) {
   // Lodash works better with native objects rather than Mongo objects
   userFrom = userFrom.toObject();
   userTo = userTo.toObject();
@@ -31,7 +35,7 @@ exports.notifyMessagesUnread = function (userFrom, userTo, notification, callbac
   }
 
   // Variables passed to Facebook notification template
-  var params = {
+  const params = {
     // Count used for template rendering
     messageCount: notification.messages.length,
 
@@ -39,7 +43,11 @@ exports.notifyMessagesUnread = function (userFrom, userTo, notification, callbac
     toUserFacebookId: _.get(userTo, 'additionalProvidersData.facebook.id'),
 
     // FB id of user who wrote the message (defaults to `false`)
-    fromUserFacebookId: _.get(userFrom, 'additionalProvidersData.facebook.id', false),
+    fromUserFacebookId: _.get(
+      userFrom,
+      'additionalProvidersData.facebook.id',
+      false,
+    ),
 
     // Will be appended after the FB Canvas app URL
     // i.e. don't include "https://www..." here!
@@ -47,16 +55,19 @@ exports.notifyMessagesUnread = function (userFrom, userTo, notification, callbac
     // Facebook canvas iframe. Leaving it out or to `false` will leave page
     // inside canvas when FB notification is clicked.
     // See `/modules/core/client/app/init.js` for more.
-    href: analyticsHandler.appendUTMParams('messages/' + userFrom.username + '?iframe_getaway=true', {
-      source: 'facebook-notification',
-      medium: 'facebook',
-      campaign: 'messages-unread',
-      content: 'reply-to'
-    })
+    href: analyticsHandler.appendUTMParams(
+      'messages/' + userFrom.username + '?iframe_getaway=true',
+      {
+        source: 'facebook-notification',
+        medium: 'facebook',
+        campaign: 'messages-unread',
+        content: 'reply-to',
+      },
+    ),
   };
 
   // Use different templates for 1st and 2nd notification
-  var nth = !(notification.notificationCount > 0) ? 'first' : 'second';
+  const nth = !(notification.notificationCount > 0) ? 'first' : 'second';
 
   exports.renderNotificationAndSend('messages-unread-' + nth, params, callback);
 };
@@ -65,9 +76,11 @@ exports.notifyMessagesUnread = function (userFrom, userTo, notification, callbac
  * Are Facebook notifications enabled?
  */
 exports.isNotificationsEnabled = function () {
-  return _.has(config, 'facebook.clientID') &&
-         _.has(config, 'facebook.clientSecret') &&
-         _.get(config, 'facebook.notificationsEnabled');
+  return (
+    _.has(config, 'facebook.clientID') &&
+    _.has(config, 'facebook.clientSecret') &&
+    _.get(config, 'facebook.notificationsEnabled')
+  );
 };
 
 /**
@@ -75,13 +88,18 @@ exports.isNotificationsEnabled = function () {
  * Requires Facebook connection to be present with `id` and `accessToken` params
  */
 exports.canNotifyUser = function (user) {
-  return _.has(user, 'additionalProvidersData.facebook.id') &&
-         _.has(user, 'additionalProvidersData.facebook.accessToken');
+  return (
+    _.has(user, 'additionalProvidersData.facebook.id') &&
+    _.has(user, 'additionalProvidersData.facebook.accessToken')
+  );
 };
 
 exports.renderNotification = function (templateName, params, callback) {
-
-  var templatePath = path.resolve('./modules/core/server/views/facebook-notifications/' + templateName + '.server.view.html');
+  const templatePath = path.resolve(
+    './modules/core/server/views/facebook-notifications/' +
+      templateName +
+      '.server.view.html',
+  );
 
   render(templatePath, params, function (err, renderedTemplate) {
     if (err) return callback(err);
@@ -103,7 +121,7 @@ exports.renderNotification = function (templateName, params, callback) {
       if (err) return callback(err);
 
       // Params passed on for the Agenda job
-      var notification = params;
+      const notification = params;
 
       // Notification message rendered from template and params
       notification.template = renderedTemplate;
@@ -114,9 +132,13 @@ exports.renderNotification = function (templateName, params, callback) {
 };
 
 exports.renderNotificationAndSend = function (templateName, params, callback) {
-  exports.renderNotification(templateName, params, function (err, notification) {
-    if (err) return callback(err);
-    // Add to Agenda queue
-    agenda.now('send facebook notification', notification, callback);
-  });
+  exports.renderNotification(
+    templateName,
+    params,
+    function (err, notification) {
+      if (err) return callback(err);
+      // Add to Agenda queue
+      agenda.now('send facebook notification', notification, callback);
+    },
+  );
 };

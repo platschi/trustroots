@@ -1,31 +1,30 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
-var should = require('should'),
-    mongoose = require('mongoose'),
-    User = mongoose.model('User'),
-    Thread = mongoose.model('Thread'),
-    Message = mongoose.model('Message'),
-    ReferenceThread = mongoose.model('ReferenceThread');
+const should = require('should');
+const mongoose = require('mongoose');
+const path = require('path');
+const utils = require(path.resolve('./testutils/server/data.server.testutil'));
+
+const User = mongoose.model('User');
+const Thread = mongoose.model('Thread');
+const Message = mongoose.model('Message');
+const ReferenceThread = mongoose.model('ReferenceThread');
 
 /**
  * Globals
  */
-var user1,
-    user2,
-    message,
-    thread,
-    referenceThread;
+let user1;
+let user2;
+let message;
+let thread;
+let referenceThread;
 
 /**
  * Unit tests
  */
 describe('Reference Thread Model Unit Tests:', function () {
-
   beforeEach(function (done) {
-
     user1 = new User({
       firstName: 'Full',
       lastName: 'Name',
@@ -33,7 +32,7 @@ describe('Reference Thread Model Unit Tests:', function () {
       email: 'test1@test.com',
       username: 'username1',
       password: 'password123',
-      provider: 'local'
+      provider: 'local',
     });
 
     user2 = new User({
@@ -43,7 +42,7 @@ describe('Reference Thread Model Unit Tests:', function () {
       email: 'test2@test.com',
       username: 'username2',
       password: 'password123',
-      provider: 'local'
+      provider: 'local',
     });
 
     message = {
@@ -52,7 +51,7 @@ describe('Reference Thread Model Unit Tests:', function () {
       userTo: null,
       userFrom: null,
       read: true,
-      created: new Date()
+      created: new Date(),
     };
 
     thread = {
@@ -60,7 +59,7 @@ describe('Reference Thread Model Unit Tests:', function () {
       userTo: null,
       userFrom: null,
       read: true,
-      updated: new Date()
+      updated: new Date(),
     };
 
     referenceThread = {
@@ -68,7 +67,7 @@ describe('Reference Thread Model Unit Tests:', function () {
       userFrom: null,
       userTo: null,
       reference: 'yes',
-      created: new Date()
+      created: new Date(),
     };
 
     // Create users and reference
@@ -92,9 +91,10 @@ describe('Reference Thread Model Unit Tests:', function () {
     });
   });
 
+  afterEach(utils.clearDatabase);
+
   describe('Method Save', function () {
     it('should be able to save without problems', function (done) {
-
       referenceThread.save(function (err) {
         should.not.exist(err);
         return done();
@@ -117,13 +117,6 @@ describe('Reference Thread Model Unit Tests:', function () {
         should.exist(err);
         return done();
       });
-    });
-
-  });
-
-  afterEach(function (done) {
-    ReferenceThread.deleteMany().exec(function () {
-      User.deleteMany().exec(done);
     });
   });
 });

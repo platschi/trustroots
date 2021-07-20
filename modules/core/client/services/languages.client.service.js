@@ -1,34 +1,29 @@
-(function () {
-  'use strict';
+angular.module('core').factory('Languages', LanguagesFactory);
 
-  angular
-    .module('core')
-    .factory('Languages', LanguagesFactory);
+/* @ngInject */
+function LanguagesFactory($window) {
+  const service = {
+    get,
+  };
 
-  /* @ngInject */
-  function LanguagesFactory($window) {
+  return service;
 
-    var service = {
-      get: get
-    };
+  function get(type) {
+    if (type === 'array') {
+      const langsArr = [];
 
-    return service;
+      angular.forEach(
+        $window.languages,
+        function (value, key) {
+          this.push({ key, name: value });
+        },
+        langsArr,
+      );
 
-    function get(type) {
-      if (type === 'array') {
-        var langsArr = [];
-
-        angular.forEach($window.languages, function (value, key) {
-          this.push({ key: key, name: value });
-        }, langsArr);
-
-        return langsArr;
-      }
-
-      // type === 'object':
-      return $window.languages;
+      return langsArr;
     }
 
+    // type === 'object':
+    return $window.languages;
   }
-
-}());
+}

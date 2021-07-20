@@ -6,32 +6,76 @@ import React from 'react';
 import adminIcon from '../images/bmo.png';
 
 export default function AdminHeader() {
-  const path = window.location.pathname;
+  const currentPath = window.location.pathname.replace('/admin/', '');
+
+  const pages = [
+    {
+      path: 'user',
+      label: 'Member report card',
+    },
+    {
+      path: 'search-users',
+      label: 'Search members',
+    },
+    {
+      path: 'messages',
+      label: 'Messages',
+    },
+    {
+      path: 'threads',
+      label: 'Threads',
+    },
+    {
+      path: 'reference-threads',
+      label: 'Reference threads',
+    },
+    {
+      path: 'acquisition-stories',
+      label: 'Acquisition stories',
+    },
+    {
+      path: 'newsletter',
+      label: 'Newsletter',
+    },
+  ];
+
+  const renderTab = ({ path, label }) => (
+    <li
+      key={path}
+      className={classnames({
+        active: currentPath === path || currentPath.startsWith(`${path}/`),
+      })}
+    >
+      <a href={`/admin/${path}`}>{label}</a>
+    </li>
+  );
+
   return (
     <>
-      <br/><br/>
+      <br />
+      <br />
       <nav className="navbar navbar-white navbar-admin">
         <div className="container">
           <div className="navbar-header">
-            <a className="navbar-brand" href="/admin" aria-label="Admin dash index">
-              <img src={ adminIcon } height="24" alt="" aria-hidden="true" focusable="false" />
+            <a
+              className="navbar-brand"
+              href="/admin"
+              aria-label="Admin dash index"
+            >
+              <img
+                src={adminIcon}
+                height="24"
+                alt=""
+                aria-hidden="true"
+                focusable="false"
+              />
             </a>
           </div>
           <ul className="nav navbar-nav">
-            <li className={ classnames({ 'active': path === '/admin/user' })}>
-              <a href="/admin/user">User report card</a>
-            </li>
-            <li className={ classnames({ 'active': path === '/admin/search-users' })}>
-              <a href="/admin/search-users">Search users</a>
-            </li>
-            <li className={ classnames({ 'active': path === '/admin/messages' })}>
-              <a href="/admin/messages">Messages</a>
-            </li>
+            {pages.map(page => renderTab(page))}
           </ul>
           <ul className="nav navbar-nav pull-right">
-            <li className={ classnames({ 'active': path === '/admin/audit-log' })}>
-              <a href="/admin/audit-log">Audit log</a>
-            </li>
+            {renderTab({ path: 'audit-log', label: 'Audit log' })}
           </ul>
         </div>
       </nav>
